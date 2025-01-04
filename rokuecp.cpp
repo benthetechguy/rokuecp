@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <libgssdp/gssdp.h>
 #include <libsoup/soup.h>
 #include <tinyxml2.h>
+#include <cstdint>
 #include <cstring>
 #include <cwchar>
 #include <string>
@@ -274,7 +275,7 @@ int rokuecp::getRokuTVChannels(const RokuDevice *device, const int maxChannels, 
         channel.isFavorite = strcmp("false", safeTextFromChildXMLElement(nextChannel, "user-favorite"));
 
         unsigned physicalChannel = 0;
-        unsigned long long frequency = 0;
+        uint64_t frequency = 0;
         tinyxml2::XMLElement *physicalChannelElement = nextChannel->FirstChildElement("physical-channel");
         tinyxml2::XMLElement *frequencyElement = nextChannel->FirstChildElement("physical-frequency");
         if (physicalChannelElement != nullptr) physicalChannelElement->QueryUnsignedText(&physicalChannel);
@@ -335,7 +336,7 @@ rokuecp::RokuExtTVChannel rokuecp::getActiveRokuTVChannel(const RokuDevice *devi
     channel.channel.isHidden = strcmp("false", safeTextFromChildXMLElement(channelElement, "user-hidden"));
     channel.channel.isFavorite = strcmp("false", safeTextFromChildXMLElement(channelElement, "user-favorite"));
     unsigned physicalChannel = 0;
-    unsigned long long frequency = 0;
+    uint64_t frequency = 0;
     tinyxml2::XMLElement *physicalChannelElement = channelElement->FirstChildElement("physical-channel");
     tinyxml2::XMLElement *frequencyElement = channelElement->FirstChildElement("physical-frequency");
     if (physicalChannelElement != nullptr) physicalChannelElement->QueryUnsignedText(&physicalChannel);

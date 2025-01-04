@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.30)
 project(rokuecp)
-
 set(CMAKE_CXX_STANDARD 11)
+
 add_library(rokuecp SHARED rokuecp.cpp)
+set_target_properties(rokuecp PROPERTIES
+    VERSION 0.1.0
+    SOVERSION 1
+    PUBLIC_HEADER rokuecp.h
+)
 
 find_package(PkgConfig)
 pkg_check_modules(gssdp REQUIRED gssdp-1.6)
@@ -15,3 +20,8 @@ target_include_directories(rokuecp PRIVATE ${tinyxml2_INCLUDE_DIRS})
 target_link_libraries(rokuecp PRIVATE ${gssdp_LINK_LIBRARIES})
 target_link_libraries(rokuecp PRIVATE ${soup_LINK_LIBRARIES})
 target_link_libraries(rokuecp PRIVATE ${tinyxml2_LINK_LIBRARIES})
+
+install(TARGETS rokuecp
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)

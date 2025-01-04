@@ -1,12 +1,11 @@
 ## RokuECP
 C/C++ library to control Roku devices remotely with ECP.  
-RokuECP is written in C++, but it also functions as a C library since it uses primitive types.
+RokuECP is written in C++, but it can also function as a C library since it uses only primitive types.
 
 ### Dependencies
 * libsoup 3
 * gssdp 1.6
 * tinyxml2
-* if linked with C, stdc++ is needed
 
 ### Example usage (C++)
 This example assumes there are 4 or less Roku devices on the local network and finds them, then prints their names.
@@ -31,7 +30,6 @@ int main() {
     }
 }
 ```
-This example could be compiled with `g++ -o main main.cpp -lrokuecp -lsoup-3.0 -lgssdp-1.6 -ltinyxml2 -lglib-2.0 -lgobject-2.0`.
 
 ### Example usage (C)
 This example accomplishes the same as the previous example, but in plain C.
@@ -57,15 +55,14 @@ int main() {
     }
 }
 ```
-This example could be compiled with `gcc -o main main.c -lrokuecp -lsoup-3.0 -lgssdp-1.6 -ltinyxml2 -lglib-2.0 -lgobject-2.0 -lstdc++`.
 
 ### API Reference
 A complete API reference is available at https://benthetechguy.github.io/rokuecp/namespacerokuecp.html
 
 ### Build and install
 ```
-mkdir build
+mkdir build && cd build
 cmake ..
 cmake --build .
-cmake --install .
+sudo cmake --install .
 ```
