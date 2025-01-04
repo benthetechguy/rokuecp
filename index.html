@@ -100,14 +100,13 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_README"></a>C/C++ library to control Roku devices remotely with ECP. <br  />
- RokuECP is written in C++, but it also functions as a C library since it uses primitive types.</p>
+ RokuECP is written in C++, but it can also function as a C library since it uses only primitive types.</p>
 <h2><a class="anchor" id="autotoc_md1"></a>
 Dependencies</h2>
 <ul>
 <li>libsoup 3</li>
 <li>gssdp 1.6</li>
 <li>tinyxml2</li>
-<li>if linked with C, stdc++ is needed</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md2"></a>
 Example usage (C++)</h2>
@@ -130,12 +129,11 @@ Example usage (C++)</h2>
 <div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Device &quot;</span> &lt;&lt; i + 1 &lt;&lt; <span class="stringliteral">&quot;: &quot;</span> &lt;&lt; device.<a class="code hl_variable" href="structrokuecp_1_1RokuDevice.html#a29a83890fc98e27d164c89d96cae7e10">name</a> &lt;&lt; std::endl;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacerokuecp_html_a38a04aa775614f39eb73b2f5bc3875a7"><div class="ttname"><a href="namespacerokuecp.html#a38a04aa775614f39eb73b2f5bc3875a7">rokuecp::findRokuDevices</a></div><div class="ttdeci">int findRokuDevices(int maxDevices, char *deviceList[])</div><div class="ttdoc">Find Roku devices on the network using SSDP.</div><div class="ttdef"><b>Definition:</b> rokuecp.cpp:132</div></div>
-<div class="ttc" id="anamespacerokuecp_html_a3b5a6a83b71aeeff4362514c44fad4df"><div class="ttname"><a href="namespacerokuecp.html#a3b5a6a83b71aeeff4362514c44fad4df">rokuecp::getRokuDevice</a></div><div class="ttdeci">RokuDevice getRokuDevice(const char *url)</div><div class="ttdoc">Get information about a Roku Device from its ECP URL.</div><div class="ttdef"><b>Definition:</b> rokuecp.cpp:172</div></div>
+<div class="ttc" id="anamespacerokuecp_html_a38a04aa775614f39eb73b2f5bc3875a7"><div class="ttname"><a href="namespacerokuecp.html#a38a04aa775614f39eb73b2f5bc3875a7">rokuecp::findRokuDevices</a></div><div class="ttdeci">int findRokuDevices(int maxDevices, char *deviceList[])</div><div class="ttdoc">Find Roku devices on the network using SSDP.</div><div class="ttdef"><b>Definition:</b> rokuecp.cpp:133</div></div>
+<div class="ttc" id="anamespacerokuecp_html_a3b5a6a83b71aeeff4362514c44fad4df"><div class="ttname"><a href="namespacerokuecp.html#a3b5a6a83b71aeeff4362514c44fad4df">rokuecp::getRokuDevice</a></div><div class="ttdeci">RokuDevice getRokuDevice(const char *url)</div><div class="ttdoc">Get information about a Roku Device from its ECP URL.</div><div class="ttdef"><b>Definition:</b> rokuecp.cpp:173</div></div>
 <div class="ttc" id="astructrokuecp_1_1RokuDevice_html"><div class="ttname"><a href="structrokuecp_1_1RokuDevice.html">rokuecp::RokuDevice</a></div><div class="ttdoc">Object containing information about a Roku Device.</div><div class="ttdef"><b>Definition:</b> rokuecp.h:28</div></div>
 <div class="ttc" id="astructrokuecp_1_1RokuDevice_html_a29a83890fc98e27d164c89d96cae7e10"><div class="ttname"><a href="structrokuecp_1_1RokuDevice.html#a29a83890fc98e27d164c89d96cae7e10">rokuecp::RokuDevice::name</a></div><div class="ttdeci">char name[122]</div><div class="ttdoc">C-string name of the device, up to Roku's 120-character maximum.</div><div class="ttdef"><b>Definition:</b> rokuecp.h:29</div></div>
-</div><!-- fragment --><p> This example could be compiled with <code>g++ -o main main.cpp -lrokuecp -lsoup-3.0 -lgssdp-1.6 -ltinyxml2 -lglib-2.0 -lgobject-2.0</code>.</p>
-<h2><a class="anchor" id="autotoc_md3"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
 Example usage (C)</h2>
 <p>This example accomplishes the same as the previous example, but in plain C. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;rokuecp.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
@@ -157,8 +155,7 @@ Example usage (C)</h2>
 <div class="line">        printf(<span class="stringliteral">&quot;Device %d: %s\n&quot;</span>, i + 1, device.name);</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p> This example could be compiled with <code>gcc -o main main.c -lrokuecp -lsoup-3.0 -lgssdp-1.6 -ltinyxml2 -lglib-2.0 -lgobject-2.0 -lstdc++</code>.</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md4"></a>
 API Reference</h2>
 <p>A complete API reference is available at <a href="https://benthetechguy.github.io/rokuecp/namespacerokuecp.html">https://benthetechguy.github.io/rokuecp/namespacerokuecp.html</a></p>
 <h2><a class="anchor" id="autotoc_md5"></a>
