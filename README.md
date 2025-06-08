@@ -4,7 +4,7 @@ C library to control Roku devices remotely with ECP.
 ### Dependencies
 * libsoup 3
 * gssdp 1.6
-* tinyxml2
+* libxml2 2.13
 
 ### Example usage
 This example assumes there are 4 or less Roku devices on the local network and finds them, then prints their names.
@@ -12,21 +12,26 @@ This example assumes there are 4 or less Roku devices on the local network and f
 #include <rokuecp.h>
 #include <stdio.h>
 #include <stdlib.h>
-const int MAX_DEVICES = 4;
 
 int main() {
-    // Set up an array of strings with size 30
-    char *urlList[MAX_DEVICES];
-    for (int i = 0; i < MAX_DEVICES; i++) {
+    // Set up an array of 4 strings with size 30
+    char* urlList[4];
+    for (int i = 0; i < 4; i++) {
         urlList[i] = malloc(30);
     }
     // Find Roku devices on local network and fill urlList
-    findRokuDevices(MAX_DEVICES, urlList);
+    findRokuDevices(4, 30, urlList);
 
     // Get info about found devices and print their names
-    for (int i = 0; urlList[i][0] != '\0'; i++) {
-        RokuDevice device = getRokuDevice(urlList[i]);
+    for (int i = 0; *urlList[i] != '\0'; i++) {
+        RokuDevice device;
+        getRokuDevice(urlList[i], &device);
         printf("Device %d: %s\n", i + 1, device.name);
+    }
+
+    // Don't forget to free the URL list!
+    for (int i = 0; i < 4; i++) {
+        free(urlList[i]);
     }
 }
 ```

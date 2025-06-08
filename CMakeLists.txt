@@ -4,7 +4,7 @@ set(CMAKE_C_STANDARD 11)
 
 add_library(rokuecp SHARED rokuecp.c)
 set_target_properties(rokuecp PROPERTIES
-    VERSION 0.1.1
+    VERSION 0.2.0
     SOVERSION 0
     PUBLIC_HEADER rokuecp.h
 )
@@ -12,7 +12,7 @@ set_target_properties(rokuecp PROPERTIES
 find_package(PkgConfig)
 pkg_check_modules(gssdp REQUIRED gssdp-1.6)
 pkg_check_modules(libsoup REQUIRED libsoup-3.0)
-pkg_check_modules(libxml2 REQUIRED libxml-2.0)
+pkg_check_modules(libxml2 REQUIRED libxml-2.0>=2.13)
 
 target_include_directories(rokuecp PRIVATE ${gssdp_INCLUDE_DIRS})
 target_include_directories(rokuecp PRIVATE ${libsoup_INCLUDE_DIRS})

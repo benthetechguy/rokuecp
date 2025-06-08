@@ -63,7 +63,7 @@ struct ssdpResourceAvailableCallbackData {
 static void ssdpResourceAvailableCallback(GSSDPResourceBrowser* self, const char* usn, const GList* locations, void* user_data) {
     struct ssdpResourceAvailableCallbackData* data = user_data;
     // Stop if the end of the device list has been reached
-    if (data->devicesFound >= data->maxDevices) {
+    if (data->devicesFound >= data->maxDevices - 1) {
         g_main_loop_quit(data->mainLoop);
     }
 
@@ -76,16 +76,20 @@ static void ssdpResourceAvailableCallback(GSSDPResourceBrowser* self, const char
  * @param url string containing the URL to request
  * @param method type of request to send (e.g. "GET" or "POST")
  * @param response Pointer to GBytes pointer, to send response data to
- * @return libsoup error code, 0 if successful
+ * @return libsoup error code, or HTTP status code, or 0 if the status is 200 OK
  */
 static int sendRequest(const char* url, const char* method, GBytes** response) {
     // Set up session and send request
     SoupSession* session = soup_session_new();
     SoupMessage* msg = soup_message_new(method, url);
     GError* error = NULL;
+    GBytes* request = soup_session_send_and_read(session, msg, NULL, &error);
     if (response) {
-        *response = soup_session_send_and_read(session, msg, NULL, &error);
+        *response = request;
+    } else {
+        g_bytes_unref(request);
     }
+    SoupStatus status = soup_message_get_status(msg);
 
     // Clean up and report error, if any
     g_object_unref(session);
@@ -95,7 +99,10 @@ static int sendRequest(const char* url, const char* method, GBytes** response) {
         g_error_free(error);
         return errorCode;
     }
-    return 0;
+    if (status == SOUP_STATUS_OK) {
+        return 0;
+    }
+    return status;
 }
 
 /** @internal
@@ -110,20 +117,37 @@ struct xmlElementToStringMap {
 /** @internal
  * Extract data from an XML node and copy results to specified strings
  * @param parentElement XML element to traverse child elements of
+ * @param attrMode true if extracting from element attributes, false if extracting from element content
  * @param map Specification for what elements to look for and where to copy them
  * @param mapSize Number of mappings in the array
  */
-static void fillFromXML(const xmlNode* parentElement, struct xmlElementToStringMap map[], const size_t mapSize) {
+static void fillFromXML(const xmlNode* parentElement, bool attrMode, struct xmlElementToStringMap map[], const size_t mapSize) {
     // Start by making every dest string empty to avoid returning garbage data
     for (size_t i = 0; i < mapSize; i++) {
         *map[i].destString = '\0';
     }
-    // Go through every child element and process those that match an element in the map
-    for (const xmlNode* node = parentElement->children; node != NULL; node = node->next) {
+
+    if (attrMode) {
+        // Get every attribute listed in the map and copy to corresponding string
+        xmlChar* value;
         for (size_t i = 0; i < mapSize; i++) {
-            if (strcmp((char*) node->name, map[i].elementName) == 0 && node->content != NULL) {
-                strlcpy(map[i].destString, (char*) node->content, map[i].destSize);
-                break;
+            if (xmlNodeGetAttrValue(parentElement, (const xmlChar*) map[i].elementName, NULL, &value) == 0) {
+                strlcpy(map[i].destString, (char*) value, map[i].destSize);
+                xmlFree(value);
+            }
+        }
+    } else {
+        // Go through every child element and process those that match an element in the map
+        for (const xmlNode* node = parentElement->children; node != NULL; node = node->next) {
+            for (size_t i = 0; i < mapSize; i++) {
+                if (strcmp((char*) node->name, map[i].elementName) == 0) {
+                    xmlChar* content = xmlNodeGetContent(node);
+                    if (content) {
+                        strlcpy(map[i].destString, (char*) content, map[i].destSize);
+                        xmlFree(content);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -168,7 +192,11 @@ int getRokuDevice(const char* url, RokuDevice* device) {
     strcat(queryURL, "/query/device-info");
     GBytes* response;
     int httpError = sendRequest(queryURL, SOUP_METHOD_GET, &response);
-    if (httpError) {
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
+        g_bytes_unref(response);
+        return -3;
+    }
+    if (httpError != 0) {
         g_bytes_unref(response);
         return httpError;
     }
@@ -209,10 +237,10 @@ int getRokuDevice(const char* url, RokuDevice* device) {
         {"supports-private-listening", tmpHasPrivateListening, 6},
         {"headphones-connected", tmpHeadphonesConnected, 6},
     };
-    fillFromXML(deviceInfoElement, map, sizeof(map) / sizeof(*map));
+    fillFromXML(deviceInfoElement, false, map, sizeof(map) / sizeof(*map));
     device->isOn = strcmp("Ready", tmpPowerMode);
     device->isTV = strcmp("false", tmpIsTV);
-    device->isLimited = strcmp("limited", tmpIsTV);
+    device->isLimited = strcmp("limited", tmpIsTV) == 0;
     device->developerMode = strcmp("false", tmpDeveloperMode);
     device->hasSearchSupport = strcmp("false", tmpSearchEnabled);
     device->hasHeadphoneSupport = strcmp("false", tmpHasPrivateListening);
@@ -234,6 +262,9 @@ int rokuSendKey(const RokuDevice *device, const char* key) {
             }
         }
     }
+    if (device->isLimited) {
+        return -2;
+    }
     // Return result of keypress request
     char* url = malloc(sizeof("/keypress/") + (strlen(device->url) + strlen(key)) * sizeof(char));
     strcpy(url, device->url);
@@ -241,6 +272,9 @@ int rokuSendKey(const RokuDevice *device, const char* key) {
     strcat(url, key);
     int result = sendRequest(url, SOUP_METHOD_POST, NULL);
     free(url);
+    if (result == SOUP_STATUS_UNAUTHORIZED) {
+        return -3;
+    }
     return result;
 }
 
@@ -257,7 +291,12 @@ int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVCha
     strcpy(queryURL, device->url);
     strcat(queryURL, "/query/tv-channels");
     GBytes* response;
-    if (sendRequest(queryURL, SOUP_METHOD_GET, &response) != 0) {
+    int httpError = sendRequest(queryURL, SOUP_METHOD_GET, &response);
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
+        g_bytes_unref(response);
+        return -6;
+    }
+    if (httpError != 0) {
         g_bytes_unref(response);
         return -1;
     }
@@ -277,37 +316,34 @@ int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVCha
     // Iterate through channels and add them to the channel list
     int channelsFound = 0;
     for (const xmlNode* nextChannel = rootElement->children; nextChannel != NULL && channelsFound < maxChannels; nextChannel = nextChannel->next) {
-        RokuTVChannel channel;
+        // Skip non-element nodes
+        if (nextChannel->type != XML_ELEMENT_NODE) {
+            continue;
+        }
 
-        char tmpHidden[6];
-        char tmpFavorite[6];
         char tmpPhysicalChannel[3];
         char tmpFrequency[7];
         struct xmlElementToStringMap map[] = {
-            {"channel-id", channel.id, sizeof(channel.id) / sizeof(char)},
-            {"name", channel.name, sizeof(channel.name) / sizeof(char)},
-            {"type", channel.type, sizeof(channel.type) / sizeof(char)},
-            {"user-hidden", tmpHidden, 6},
-            {"user-favorite", tmpFavorite, 6},
+            {"channel-id", channelList[channelsFound].id, sizeof(channelList->id) / sizeof(char)},
+            {"broadcast-network-label", channelList[channelsFound].network, sizeof(channelList->network) / sizeof(char)},
+            {"name", channelList[channelsFound].name, sizeof(channelList->name) / sizeof(char)},
+            {"type", channelList[channelsFound].type, sizeof(channelList->type) / sizeof(char)},
             {"physical-channel", tmpPhysicalChannel, 3},
             {"physical-frequency", tmpFrequency, 7},
         };
-        fillFromXML(nextChannel, map, sizeof(map) / sizeof(*map));
-        channel.isHidden = strcmp("false", tmpHidden);
-        channel.isFavorite = strcmp("false", tmpFavorite);
+        fillFromXML(nextChannel, false, map, sizeof(map) / sizeof(*map));
         if (*tmpPhysicalChannel == '\0') {
-            channel.physicalChannel = 0;
+            channelList[channelsFound].physicalChannel = 0;
         } else {
-            channel.physicalChannel = strtoul(tmpPhysicalChannel, NULL, 10);
+            channelList[channelsFound].physicalChannel = strtoul(tmpPhysicalChannel, NULL, 10);
         }
-        if (*tmpFrequency != '\0') {
-            channel.frequency = 0;
+        if (*tmpFrequency == '\0') {
+            channelList[channelsFound].frequency = 0;
         } else {
-            channel.frequency = strtoul(tmpFrequency, NULL, 10) * 1000UL;
+            channelList[channelsFound].frequency = strtoul(tmpFrequency, NULL, 10) * 1000UL;
         }
 
-        // Add channel to channel list while incrementing number of channels found
-        channelList[channelsFound++] = channel;
+        channelsFound++;
     }
 
     // Clean up and return number of channels found
@@ -328,10 +364,13 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
     strcpy(queryURL, device->url);
     strcat(queryURL, "/query/tv-active-channel");
     GBytes* response;
-    int errorCode = sendRequest(queryURL, SOUP_METHOD_GET, &response);
-    if (errorCode) {
+    int httpError = sendRequest(queryURL, SOUP_METHOD_GET, &response);
+    if (httpError ==  SOUP_STATUS_UNAUTHORIZED) {
+        return -5;
+    }
+    if (httpError) {
         g_bytes_unref(response);
-        return errorCode;
+        return httpError;
     }
 
     // Parse active channel XML and get channel element
@@ -351,39 +390,37 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
         xmlFreeDoc(doc);
         return -2;
     }
+    if (channelElement->type != XML_ELEMENT_NODE) {
+        channelElement = channelElement->next;
+    }
 
     // Fill in channel with data from XML
-    char tmpHidden[6];
-    char tmpFavorite[6];
     char tmpPhysicalChannel[3];
     char tmpFrequency[7];
     char tmpActive[6];
     struct xmlElementToStringMap map[] = {
         {"channel-id", channel->channel.id, sizeof(channel->channel.id) / sizeof(char)},
+        {"broadcast-network-label", channel->channel.network, sizeof(channel->channel.network) / sizeof(char)},
         {"name", channel->channel.name, sizeof(channel->channel.name) / sizeof(char)},
         {"type", channel->channel.type, sizeof(channel->channel.type) / sizeof(char)},
-        {"user-hidden", tmpHidden, 6},
-        {"user-favorite", tmpFavorite, 6},
         {"physical-channel", tmpPhysicalChannel, 3},
         {"physical-frequency", tmpFrequency, 7},
         {"active-input", tmpActive, 6},
     };
-    fillFromXML(channelElement, map, sizeof(map) / sizeof(*map));
-    channel->channel.isHidden = strcmp("false", tmpHidden);
-    channel->channel.isFavorite = strcmp("false", tmpFavorite);
+    fillFromXML(channelElement, false, map, sizeof(map) / sizeof(*map));
     if (*tmpPhysicalChannel == '\0') {
         channel->channel.physicalChannel = 0;
     } else {
         channel->channel.physicalChannel = strtoul(tmpPhysicalChannel, NULL, 10);
     }
-    if (*tmpFrequency != '\0') {
+    if (*tmpFrequency == '\0') {
         channel->channel.frequency = 0;
     } else {
         channel->channel.frequency = strtoul(tmpFrequency, NULL, 10) * 1000UL;
     }
 
     // Only fill in the rest of the data if the channel is active (inactive channels have these fields blank)
-    channel->isActive = strcmp("false", tmpActive);
+    channel->isActive = strcmp("true", tmpActive) == 0;
     if (channel->isActive) {
         char tmpHasCC[6];
         char tmpSignalState[5];
@@ -396,10 +433,10 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
             {"program-has-cc", tmpHasCC, 6},
             {"signal-mode", channel->resolution, sizeof(channel->resolution) / sizeof(char)},
             {"signal-state", tmpSignalState, 5},
-            {"signal-quality", tmpSignalState, 4},
-            {"signal-strength", tmpSignalState, 5},
+            {"signal-quality", tmpSignalQuality, 4},
+            {"signal-strength", tmpSignalStrength, 5},
         };
-        fillFromXML(channelElement, ifActiveMap, sizeof(ifActiveMap) / sizeof(*map));
+        fillFromXML(channelElement, false, ifActiveMap, sizeof(ifActiveMap) / sizeof(*map));
         channel->program.hasCC = strcmp("false", tmpHasCC);
         channel->signalReceived = strcmp("none", tmpSignalState);
         if (*tmpSignalQuality == '\0') {
@@ -438,7 +475,12 @@ int getRokuApps(const RokuDevice *device, const int maxApps, RokuApp appList[]) 
     strcpy(queryURL, device->url);
     strcat(queryURL, "/query/apps");
     GBytes* response;
-    if (sendRequest(queryURL, SOUP_METHOD_GET, &response) != 0) {
+    int httpError = sendRequest(queryURL, SOUP_METHOD_GET, &response);
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
+        g_bytes_unref(response);
+        return -5;
+    }
+    if (httpError) {
         g_bytes_unref(response);
         return -1;
     }
@@ -458,36 +500,27 @@ int getRokuApps(const RokuDevice *device, const int maxApps, RokuApp appList[]) 
     // Iterate through apps and add them to the app list
     int appsFound = 0;
     for (const xmlNode* nextApp = rootElement->children; nextApp != NULL && appsFound < maxApps; nextApp = nextApp->next) {
-        RokuApp app;
-
+        // Skip non-element nodes
+        if (nextApp->type != XML_ELEMENT_NODE) {
+            continue;
+        }
+        // Get app name from XML element content
+        xmlChar* name = xmlNodeGetContent(nextApp);
+        if (name) {
+            strlcpy(appList[appsFound].name, (char*) name, sizeof(appList->name) / sizeof(char));
+            xmlFree(name);
+        } else {
+            *appList[appsFound].name = '\0';
+        }
         // Fill in app with data from XML
-        xmlChar* xmlAttrValue;
-        if (nextApp->content) {
-            strlcpy(app.name, (char*) nextApp->content, sizeof(app.name) / sizeof(char));
-        } else {
-            *app.name = '\0';
-        }
-        if (xmlNodeGetAttrValue(nextApp, "id", NULL, &xmlAttrValue) == 0) {
-            strlcpy(app.id, (char*) xmlAttrValue, sizeof(app.id) / sizeof(char));
-            xmlMemFree(xmlAttrValue);
-        } else {
-            *app.id = '\0';
-        }
-        if (xmlNodeGetAttrValue(nextApp, "type", NULL, &xmlAttrValue) == 0) {
-            strlcpy(app.type, (char*) xmlAttrValue, sizeof(app.type) / sizeof(char));
-            xmlMemFree(xmlAttrValue);
-        } else {
-            *app.type = '\0';
-        }
-        if (xmlNodeGetAttrValue(nextApp, "version", NULL, &xmlAttrValue) == 0) {
-            strlcpy(app.version, (char*) xmlAttrValue, sizeof(app.version) / sizeof(char));
-            xmlMemFree(xmlAttrValue);
-        } else {
-            *app.version = '\0';
-        }
+        struct xmlElementToStringMap map[] = {
+            {"id", appList[appsFound].id, sizeof(appList->id) / sizeof(char)},
+            {"type", appList[appsFound].type, sizeof(appList->type) / sizeof(char)},
+            {"version", appList[appsFound].version, sizeof(appList->version) / sizeof(char)},
+        };
+        fillFromXML(nextApp, true, map, sizeof(map) / sizeof(*map));
 
-        // Add app to app list while incrementing number of apps found
-        appList[appsFound++] = app;
+        appsFound++;
     }
 
     // Clean up and return number of apps found
@@ -501,10 +534,14 @@ int getActiveRokuApp(const RokuDevice *device, RokuApp* app) {
     strcpy(queryURL, device->url);
     strcat(queryURL, "/query/active-app");
     GBytes* response;
-    int errorCode = sendRequest(queryURL, SOUP_METHOD_GET, &response);
-    if (errorCode) {
+    int httpError = sendRequest(queryURL, SOUP_METHOD_GET, &response);
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
         g_bytes_unref(response);
-        return errorCode;
+        return -3;
+    }
+    if (httpError) {
+        g_bytes_unref(response);
+        return httpError;
     }
 
     // Parse active app XML and get app element
@@ -524,32 +561,25 @@ int getActiveRokuApp(const RokuDevice *device, RokuApp* app) {
         xmlFreeDoc(doc);
         return -2;
     }
+    if (appElement->type != XML_ELEMENT_NODE) {
+        appElement = appElement->next;
+    }
 
-    // Fill in app with data from XML
-    xmlChar* xmlAttrValue;
-    if (appElement->content) {
-        strlcpy(app->name, (char*) appElement->content, sizeof(app->name) / sizeof(char));
+    // Get app name from XML element content
+    xmlChar* name = xmlNodeGetContent(appElement);
+    if (name) {
+        strlcpy(app->name, (char*) name, sizeof(app->name) / sizeof(char));
+        xmlFree(name);
     } else {
         *app->name = '\0';
     }
-    if (xmlNodeGetAttrValue(appElement, "id", NULL, &xmlAttrValue) == 0) {
-        strlcpy(app->id, (char*) xmlAttrValue, sizeof(app->id) / sizeof(char));
-        xmlMemFree(xmlAttrValue);
-    } else {
-        *app->id = '\0';
-    }
-    if (xmlNodeGetAttrValue(appElement, "type", NULL, &xmlAttrValue) == 0) {
-        strlcpy(app->type, (char*) xmlAttrValue, sizeof(app->type) / sizeof(char));
-        xmlMemFree(xmlAttrValue);
-    } else {
-        *app->type = '\0';
-    }
-    if (xmlNodeGetAttrValue(appElement, "version", NULL, &xmlAttrValue) == 0) {
-        strlcpy(app->version, (char*) xmlAttrValue, sizeof(app->version) / sizeof(char));
-        xmlMemFree(xmlAttrValue);
-    } else {
-        *app->version = '\0';
-    }
+    // Fill in app with data from XML
+    struct xmlElementToStringMap map[] = {
+        {"id", app->id, sizeof(app->id) / sizeof(char)},
+        {"type", app->type, sizeof(app->type) / sizeof(char)},
+        {"version", app->version, sizeof(app->version) / sizeof(char)},
+    };
+    fillFromXML(appElement, true, map, sizeof(map) / sizeof(*map));
 
     // Clean up and return app
     xmlFreeDoc(doc);
@@ -571,10 +601,16 @@ int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* ic
 
     // fill icon data and size while freeing GBytes
     icon->data = g_bytes_unref_to_data(response, &icon->size);
+    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+        return -2;
+    }
     return errorCode;
 }
 
 int sendCustomRokuInput(const RokuDevice *device, const size_t params, const char* names[], const char* values[]) {
+    if (device->isLimited) {
+        return -1;
+    }
     // Construct input request string with base and params
     GString* url = g_string_sized_new(strlen(device->url) * sizeof(char) + sizeof("/input?"));
     g_string_assign(url, device->url);
@@ -592,6 +628,9 @@ int sendCustomRokuInput(const RokuDevice *device, const size_t params, const cha
     // Clean up and return result of input request
     int errorCode = sendRequest(url->str, SOUP_METHOD_POST, NULL);
     g_string_free(url, TRUE);
+    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+        return -2;
+    }
     return errorCode;
 }
 
@@ -661,10 +700,16 @@ int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchPa
 
     int errorCode = sendRequest(url->str, SOUP_METHOD_POST, NULL);
     g_string_free(url, TRUE);
+    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+        return -1;
+    }
     return errorCode;
 }
 
 int rokuTypeString(const RokuDevice *device, const wchar_t* string) {
+    if (device->isLimited) {
+        return -1;
+    }
     int errorCode = 0;
 
     // Iterate through wide string
@@ -672,6 +717,11 @@ int rokuTypeString(const RokuDevice *device, const wchar_t* string) {
         // Convert each wide char into a multibyte string for URL escaping
         char mbstr[MB_CUR_MAX + 1];
         int len = wctomb(mbstr, *string);
+        // If this is an "invalid character" in the current locale, skip it
+        if (len == -1) {
+            string++;
+            continue;
+        }
         mbstr[len] = '\0';
 
         // Escape each character and send the key "Lit_{character}" to the Roku device, checking for errors
@@ -681,6 +731,9 @@ int rokuTypeString(const RokuDevice *device, const wchar_t* string) {
         strcat(key, escaped);
         errorCode = rokuSendKey(device, key);
         free(key);
+        if (errorCode == -3) {
+            return -2;
+        }
 
         string++;
     }
