@@ -90,26 +90,40 @@ typedef struct {
     unsigned long size; /**< number of bytes pointed to by the data attribute */
 } RokuAppIcon;
 
-/** enum Roku search filter (movie, TV show, person, app, game, or none) */
-typedef enum {
-    MOVIE,
-    SHOW,
-    PERSON,
-    APP,
-    GAME,
-    NONE
-} RokuSearchType;
-
 /** Information about a Roku search to be performed. All fields are optional. */
 typedef struct {
-    RokuSearchType type; /**< enum Roku search filter */
+    enum {
+        MOVIE,
+        SHOW,
+        PERSON,
+        APP,
+        GAME,
+        NONE
+    } type; /**< Roku search filter (movie, TV show, person, app, game, or none) */
     bool includeUnavailable; /**< true if results that are unavailable in your region should still be included */
     char tmsID[15]; /**< TMS ID of the movie or show to search for, 14 characters */
     unsigned short season; /**< season of the show to search for */
     bool autoSelect; /**< true if the first result should automatically be selected */
     bool autoLaunch; /**< true if the first provider in providerIDs with a result found should be launched automatically */
-    char providerIDs[14][8]; /**< array of up to 8 Roku app ID strings (up to 13 characters) for providers to look for results from (like "12" for Netflix) */
+    char providerIDs[14][8]; /**< array of up to 8 Roku app IDs (up to 13 characters) for providers to look for results from (like "12" for Netflix) */
 } RokuSearchParams;
+
+typedef struct {
+    char appID[14]; /**< ID of Roku app to launch, up to 13 characters */
+    char contentID[256]; /**< Optional unique identifier for a specific piece of content (empty string if none) up to 255 characters */
+    enum {
+        FILM,
+        SERIES,
+        SEASON,
+        EPISODE,
+        SHORT_FORM_VIDEO,
+        TV_SPECIAL,
+        NO_TYPE
+    } mediaType; /**< Type of contentID (movie, TV show, season, episode, short-form video, TV special, or none) */
+    const char** otherParamNames; /**< Array of names for other parameters to pass to app */
+    const char** otherParamValues; /**< Array of values for these extra parameters */
+    size_t numOtherParams; /**< Number of extra parameters */
+} RokuAppLaunchParams;
 
 /**
  * Find Roku devices on the network using SSDP
@@ -172,6 +186,14 @@ int getRokuTVChannels(const RokuDevice *device, int maxChannels, RokuTVChannel c
 int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel);
 
 /**
+ * Launch a given Live TV channel on a given Roku device
+ * @param device Pointer to RokuDevice to launch channel on
+ * @param channel Pointer to RokuTVChannel to launch
+ * @return libsoup error code for launch request, or -1 if the device has ECP disabled, or -2 if the device is not a TV.
+ */
+int launchRokuTVChannel(const RokuDevice* device, const RokuTVChannel* channel);
+
+/**
  * Get a list of apps on a given Roku device
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice to list the apps on
@@ -194,6 +216,14 @@ int getRokuApps(const RokuDevice *device, int maxApps, RokuApp appList[]);
  *                                                                                       , -3 if the device has ECP disabled.
  */
 int getActiveRokuApp(const RokuDevice *device, RokuApp* app);
+
+/**
+ * Launch a given app on a given Roku device
+ * @param device Pointer to RokuDevice to launch the app on
+ * @param params App ID and optional parameters to launch with
+ * @return libsoup error code for launch request, or -1 if the device has ECP disabled.
+ */
+int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params);
 
 /**
  * Get a given app's icon

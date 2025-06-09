@@ -18,17 +18,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <libsoup/soup.h>
 #include <libxml/parser.h>
 
-// Not all platforms have strlcpy (ahem... windows)
-#ifndef strlcpy
+// Not all platforms have strlcpy (ahem... MinGW)
+#ifdef NO_STRLCPY
 size_t strlcpy(char* dest, const char* src, size_t size) {
     strncpy(dest, src, size - 1);
-
+    dest[size - 1] = '\0';
     size_t srclen = strlen(src);
-    if (srclen >= size) {
-        dest[size - 1] = '\0';
-        return size - 1;
+    if (srclen < size - 1) {
+        return srclen;
     }
-    return srclen;
+    return size - 1;
 }
 #endif
 
@@ -196,7 +195,7 @@ int getRokuDevice(const char* url, RokuDevice* device) {
         g_bytes_unref(response);
         return -3;
     }
-    if (httpError != 0) {
+    if (httpError) {
         g_bytes_unref(response);
         return httpError;
     }
@@ -214,13 +213,13 @@ int getRokuDevice(const char* url, RokuDevice* device) {
     }
 
     // Fill in device fields based on device-info response
-    char tmpPowerMode[6];
-    char tmpIsTV[6];
+    char tmpPowerMode[8];
+    char tmpIsTV[5];
     char tmpEcpMode[8];
-    char tmpDeveloperMode[6];
-    char tmpSearchEnabled[6];
-    char tmpHasPrivateListening[6];
-    char tmpHeadphonesConnected[6];
+    char tmpDeveloperMode[5];
+    char tmpSearchEnabled[5];
+    char tmpHasPrivateListening[5];
+    char tmpHeadphonesConnected[5];
     struct xmlElementToStringMap map[14] = {
         {"user-device-name", device->name, sizeof(device->name) / sizeof(char)},
         {"user-device-location", device->location, sizeof(device->location) / sizeof(char)},
@@ -229,22 +228,22 @@ int getRokuDevice(const char* url, RokuDevice* device) {
         {"ui-resolution", device->resolution, sizeof(device->resolution) / sizeof(char)},
         {"wifi-mac", device->macAddress, sizeof(device->macAddress) / sizeof(char)},
         {"software-version", device->softwareVersion, sizeof(device->softwareVersion) / sizeof(char)},
-        {"power-mode", tmpPowerMode, 6},
-        {"is-tv", tmpIsTV, 6},
+        {"power-mode", tmpPowerMode, 8},
+        {"is-tv", tmpIsTV, 5},
         {"ecp-setting-mode", tmpEcpMode, 8},
-        {"developer-enabled", tmpDeveloperMode, 6},
-        {"search-enabled", tmpSearchEnabled, 6},
-        {"supports-private-listening", tmpHasPrivateListening, 6},
-        {"headphones-connected", tmpHeadphonesConnected, 6},
+        {"developer-enabled", tmpDeveloperMode, 5},
+        {"search-enabled", tmpSearchEnabled, 5},
+        {"supports-private-listening", tmpHasPrivateListening, 5},
+        {"headphones-connected", tmpHeadphonesConnected, 5},
     };
     fillFromXML(deviceInfoElement, false, map, sizeof(map) / sizeof(*map));
-    device->isOn = strcmp("Ready", tmpPowerMode);
-    device->isTV = strcmp("false", tmpIsTV);
+    device->isOn = strcmp("PowerOn", tmpPowerMode) == 0;
+    device->isTV = strcmp("true", tmpIsTV) == 0;
     device->isLimited = strcmp("limited", tmpIsTV) == 0;
-    device->developerMode = strcmp("false", tmpDeveloperMode);
-    device->hasSearchSupport = strcmp("false", tmpSearchEnabled);
-    device->hasHeadphoneSupport = strcmp("false", tmpHasPrivateListening);
-    device->headphonesConnected = strcmp("false", tmpHeadphonesConnected);
+    device->developerMode = strcmp("true", tmpDeveloperMode) == 0;
+    device->hasSearchSupport = strcmp("true", tmpSearchEnabled) == 0;
+    device->hasHeadphoneSupport = strcmp("true", tmpHasPrivateListening) == 0;
+    device->headphonesConnected = strcmp("true", tmpHeadphonesConnected) == 0;
 
     // Clean up and return
     xmlFreeDoc(doc);
@@ -296,7 +295,7 @@ int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVCha
         g_bytes_unref(response);
         return -6;
     }
-    if (httpError != 0) {
+    if (httpError) {
         g_bytes_unref(response);
         return -1;
     }
@@ -332,15 +331,15 @@ int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVCha
             {"physical-frequency", tmpFrequency, 7},
         };
         fillFromXML(nextChannel, false, map, sizeof(map) / sizeof(*map));
-        if (*tmpPhysicalChannel == '\0') {
-            channelList[channelsFound].physicalChannel = 0;
-        } else {
+        if (*tmpPhysicalChannel) {
             channelList[channelsFound].physicalChannel = strtoul(tmpPhysicalChannel, NULL, 10);
-        }
-        if (*tmpFrequency == '\0') {
-            channelList[channelsFound].frequency = 0;
         } else {
+            channelList[channelsFound].physicalChannel = 0;
+        }
+        if (*tmpFrequency) {
             channelList[channelsFound].frequency = strtoul(tmpFrequency, NULL, 10) * 1000UL;
+        } else {
+            channelList[channelsFound].frequency = 0;
         }
 
         channelsFound++;
@@ -408,21 +407,21 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
         {"active-input", tmpActive, 6},
     };
     fillFromXML(channelElement, false, map, sizeof(map) / sizeof(*map));
-    if (*tmpPhysicalChannel == '\0') {
-        channel->channel.physicalChannel = 0;
-    } else {
+    if (*tmpPhysicalChannel) {
         channel->channel.physicalChannel = strtoul(tmpPhysicalChannel, NULL, 10);
-    }
-    if (*tmpFrequency == '\0') {
-        channel->channel.frequency = 0;
     } else {
+        channel->channel.physicalChannel = 0;
+    }
+    if (*tmpFrequency) {
         channel->channel.frequency = strtoul(tmpFrequency, NULL, 10) * 1000UL;
+    } else {
+        channel->channel.frequency = 0;
     }
 
     // Only fill in the rest of the data if the channel is active (inactive channels have these fields blank)
     channel->isActive = strcmp("true", tmpActive) == 0;
     if (channel->isActive) {
-        char tmpHasCC[6];
+        char tmpHasCC[5];
         char tmpSignalState[5];
         char tmpSignalQuality[4];
         char tmpSignalStrength[5];
@@ -430,24 +429,24 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
             {"program-title", channel->program.title, sizeof(channel->program.title) / sizeof(char)},
             {"program-description", channel->program.description, sizeof(channel->program.description) / sizeof(char)},
             {"program-ratings", channel->program.rating, sizeof(channel->program.rating) / sizeof(char)},
-            {"program-has-cc", tmpHasCC, 6},
+            {"program-has-cc", tmpHasCC, 5},
             {"signal-mode", channel->resolution, sizeof(channel->resolution) / sizeof(char)},
             {"signal-state", tmpSignalState, 5},
             {"signal-quality", tmpSignalQuality, 4},
             {"signal-strength", tmpSignalStrength, 5},
         };
         fillFromXML(channelElement, false, ifActiveMap, sizeof(ifActiveMap) / sizeof(*map));
-        channel->program.hasCC = strcmp("false", tmpHasCC);
+        channel->program.hasCC = strcmp("true", tmpHasCC) == 0;
         channel->signalReceived = strcmp("none", tmpSignalState);
-        if (*tmpSignalQuality == '\0') {
-            channel->signalQuality = 0;
-        } else {
+        if (*tmpSignalQuality) {
             channel->signalQuality = strtoul(tmpSignalQuality, NULL, 10);
-        }
-        if (*tmpSignalStrength == '\0') {
-            channel->signalStrength = 0;
         } else {
+            channel->signalQuality = 0;
+        }
+        if (*tmpSignalStrength) {
             channel->signalStrength = (int8_t) strtol(tmpSignalStrength, NULL, 10);
+        } else {
+            channel->signalStrength = 0;
         }
     } else {
         *channel->program.title = '\0';
@@ -463,6 +462,23 @@ int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) 
     // Clean up and return active channel
     xmlFreeDoc(doc);
     return 0;
+}
+
+int launchRokuTVChannel(const RokuDevice* device, const RokuTVChannel* channel) {
+    if (!device->isTV) {
+        return -2;
+    }
+    const char* paramNames[3] = {"chan", "lcn", "ch"};
+    const char* paramValues[3] = {channel->id, channel->id, channel->id};
+    RokuAppLaunchParams launchParams = {
+        "tvinput.dtv",
+        "",
+        NO_TYPE,
+        paramNames,
+        paramValues,
+        3
+    };
+    return launchRokuApp(device, &launchParams);
 }
 
 int getRokuApps(const RokuDevice *device, const int maxApps, RokuApp appList[]) {
@@ -586,6 +602,74 @@ int getActiveRokuApp(const RokuDevice *device, RokuApp* app) {
     return 0;
 }
 
+int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params) {
+    GString* url = g_string_sized_new((strlen(device->url) + strlen(params->appID)) * sizeof(char) + sizeof("/launch/"));
+    g_string_assign(url, device->url);
+    g_string_append(url, "/launch/");
+    g_string_append(url, params->appID);
+
+    bool hasContentID = *params->contentID != '\0';
+    bool hasMediaType = params->mediaType != NO_TYPE;
+    bool hasOtherParams = params->numOtherParams != 0;
+
+    if (hasContentID) {
+        g_string_append(url, "?contentId=");
+        g_string_append_uri_escaped(url, params->contentID, NULL, TRUE);
+    }
+    if (hasMediaType) {
+        if (hasContentID) {
+            g_string_append_c(url, '&');
+        } else {
+            g_string_append_c(url, '?');
+        }
+    }
+    switch (params->mediaType) {
+        case FILM:
+            g_string_append(url, "MediaType=movie");
+            break;
+        case SERIES:
+            g_string_append(url, "MediaType=series");
+            break;
+        case SEASON:
+            g_string_append(url, "MediaType=season");
+            break;
+        case EPISODE:
+            g_string_append(url, "MediaType=episode");
+            break;
+        case SHORT_FORM_VIDEO:
+            g_string_append(url, "MediaType=shortFormVideo");
+            break;
+        case TV_SPECIAL:
+            g_string_append(url, "MediaType=tvSpecial");
+            break;
+        default:
+            break;
+    }
+
+    if (hasOtherParams) {
+        if (hasContentID || hasMediaType) {
+            g_string_append_c(url, '&');
+        } else {
+            g_string_append_c(url, '?');
+        }
+    }
+    for (size_t i = 0; i < params->numOtherParams; i++) {
+        g_string_append_uri_escaped(url, params->otherParamNames[i], NULL, TRUE);
+        g_string_append_c(url, '=');
+        g_string_append_uri_escaped(url, params->otherParamValues[i], NULL, TRUE);
+        if (i != params->numOtherParams - 1) {
+            g_string_append_c(url, '&');
+        }
+    }
+
+    int httpError = sendRequest(url->str, SOUP_METHOD_POST, NULL);
+    g_string_free(url, TRUE);
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
+        return -1;
+    }
+    return httpError;
+}
+
 int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* icon) {
     if (device->isLimited) {
         return -1;
@@ -596,15 +680,15 @@ int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* ic
     strcat(url, "/query/icon/");
     strcat(url, app->id);
     GBytes* response;
-    int errorCode = sendRequest(url, SOUP_METHOD_GET, &response);
+    int httpError = sendRequest(url, SOUP_METHOD_GET, &response);
     free(url);
 
     // fill icon data and size while freeing GBytes
     icon->data = g_bytes_unref_to_data(response, &icon->size);
-    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
         return -2;
     }
-    return errorCode;
+    return httpError;
 }
 
 int sendCustomRokuInput(const RokuDevice *device, const size_t params, const char* names[], const char* values[]) {
@@ -626,12 +710,12 @@ int sendCustomRokuInput(const RokuDevice *device, const size_t params, const cha
     }
 
     // Clean up and return result of input request
-    int errorCode = sendRequest(url->str, SOUP_METHOD_POST, NULL);
+    int httpError = sendRequest(url->str, SOUP_METHOD_POST, NULL);
     g_string_free(url, TRUE);
-    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
         return -2;
     }
-    return errorCode;
+    return httpError;
 }
 
 int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchParams *params) {
@@ -682,28 +766,28 @@ int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchPa
         g_string_append(url, "&season=");
         g_string_append_printf(url, "%u", params->season);
     }
-    if (*params->tmsID != '\0') {
+    if (*params->tmsID) {
         g_string_append(url, "&tmsid=");
         g_string_append(url, params->tmsID);
     }
 
-    if (*params->providerIDs[0] != '\0') {
+    if (*params->providerIDs[0]) {
         g_string_append(url, "&provider-id=");
         g_string_append(url, params->providerIDs[0]);
         for (int i = 1; i < 8; i++) {
-            if (*params->providerIDs[i] != '\0') {
+            if (*params->providerIDs[i]) {
                 g_string_append_c(url, ',');
                 g_string_append(url, params->providerIDs[i]);
             }
         }
     }
 
-    int errorCode = sendRequest(url->str, SOUP_METHOD_POST, NULL);
+    int httpError = sendRequest(url->str, SOUP_METHOD_POST, NULL);
     g_string_free(url, TRUE);
-    if (errorCode == SOUP_STATUS_UNAUTHORIZED) {
+    if (httpError == SOUP_STATUS_UNAUTHORIZED) {
         return -1;
     }
-    return errorCode;
+    return httpError;
 }
 
 int rokuTypeString(const RokuDevice *device, const wchar_t* string) {

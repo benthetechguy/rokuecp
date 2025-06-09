@@ -9,6 +9,12 @@ set_target_properties(rokuecp PROPERTIES
     PUBLIC_HEADER rokuecp.h
 )
 
+include(CheckFunctionExists)
+check_function_exists(strlcpy HAVE_STRLCPY)
+if(NOT HAVE_STRLCPY)
+    target_compile_definitions(rokuecp PRIVATE -DNO_STRLCPY)
+endif()
+
 find_package(PkgConfig)
 pkg_check_modules(gssdp REQUIRED gssdp-1.6)
 pkg_check_modules(libsoup REQUIRED libsoup-3.0)
