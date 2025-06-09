@@ -684,7 +684,9 @@ int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* ic
     free(url);
 
     // fill icon data and size while freeing GBytes
-    icon->data = g_bytes_unref_to_data(response, &icon->size);
+    gsize size;
+    icon->data = g_bytes_unref_to_data(response, &size);
+    icon->size = size;
     if (httpError == SOUP_STATUS_UNAUTHORIZED) {
         return -2;
     }
