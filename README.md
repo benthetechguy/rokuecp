@@ -6,6 +6,9 @@ C library to control Roku devices remotely with ECP.
 * gssdp 1.6
 * libxml2 2.13
 
+### Compatibility
+Should work with anything supported by the dependencies above. Tested on Linux, macOS, and Windows (build with MinGW).
+
 ### Example usage
 This example assumes there are 4 or less Roku devices on the local network and finds them, then prints their names.
 ```C
@@ -20,10 +23,10 @@ int main() {
         urlList[i] = malloc(30);
     }
     // Find Roku devices on local network and fill urlList
-    findRokuDevices(4, 30, urlList);
+    int devicesFound = findRokuDevices(NULL, 4, 30, urlList);
 
     // Get info about found devices and print their names
-    for (int i = 0; *urlList[i] != '\0'; i++) {
+    for (int i = 0; i < devicesFound; i++) {
         RokuDevice device;
         getRokuDevice(urlList[i], &device);
         printf("Device %d: %s\n", i + 1, device.name);
