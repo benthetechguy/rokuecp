@@ -127,13 +127,14 @@ typedef struct {
 
 /**
  * Find Roku devices on the network using SSDP
+ * @param interface Name of network interface to search on. Set NULL to auto-select the primary interface.
  * @param maxDevices Maximum number of devices to look for
  * @param urlStringSize Size of destination URL strings (recommended 30)
  * @param deviceList Array (of size maxDevices) of strings (size urlStringSize), which will be updated to contain the
  *                   ECP URLs of found Roku Devices. Remaining elements, if any, will be made empty strings.
  * @return Number of devices found within five seconds, or a negated gssdp error code
  */
-int findRokuDevices(size_t maxDevices, size_t urlStringSize, char* deviceList[]);
+int findRokuDevices(const char* interface, size_t maxDevices, size_t urlStringSize, char* deviceList[]);
 
 /**
  * Get information about a Roku Device from its ECP URL
@@ -155,7 +156,7 @@ int getRokuDevice(const char* url, RokuDevice* device);
  *                                                                   , -2 if the device is in Limited mode,
  *                                                                   , -3 if the device has ECP disabled.
  */
-int rokuSendKey(const RokuDevice *device, const char* key);
+int rokuSendKey(const RokuDevice* device, const char* key);
 
 /**
  * Get a list of TV channels accessible from a given Roku device
@@ -170,7 +171,7 @@ int rokuSendKey(const RokuDevice *device, const char* key);
  *                                                                      , -5 if the device is in Limited mode
  *                                                                      , -6 if the device has ECP disabled.
  */
-int getRokuTVChannels(const RokuDevice *device, int maxChannels, RokuTVChannel channelList[]);
+int getRokuTVChannels(const RokuDevice* device, int maxChannels, RokuTVChannel channelList[]);
 
 /**
  * Get either the current or last active TV channel on a given Roku device
@@ -183,7 +184,7 @@ int getRokuTVChannels(const RokuDevice *device, int maxChannels, RokuTVChannel c
  *                                                                                              , -4 if the device is in Limited mode
  *                                                                                              , -5 if the device has ECP disabled.
  */
-int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel);
+int getActiveRokuTVChannel(const RokuDevice* device, RokuExtTVChannel* channel);
 
 /**
  * Launch a given Live TV channel on a given Roku device
@@ -205,7 +206,7 @@ int launchRokuTVChannel(const RokuDevice* device, const RokuTVChannel* channel);
  *                                                                  , -4 if the device is in Limited mode
  *                                                                  , -5 if the device has ECP disabled.
 */
-int getRokuApps(const RokuDevice *device, int maxApps, RokuApp appList[]);
+int getRokuApps(const RokuDevice* device, int maxApps, RokuApp appList[]);
 
 /**
  * Get the current active app on a given Roku device
@@ -215,7 +216,7 @@ int getRokuApps(const RokuDevice *device, int maxApps, RokuApp appList[]);
  *                                                                                       , -2 if app element is empty
  *                                                                                       , -3 if the device has ECP disabled.
  */
-int getActiveRokuApp(const RokuDevice *device, RokuApp* app);
+int getActiveRokuApp(const RokuDevice* device, RokuApp* app);
 
 /**
  * Launch a given app on a given Roku device
@@ -223,7 +224,7 @@ int getActiveRokuApp(const RokuDevice *device, RokuApp* app);
  * @param params App ID and optional parameters to launch with
  * @return libsoup error code for launch request, or -1 if the device has ECP disabled.
  */
-int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params);
+int launchRokuApp(const RokuDevice* device, const RokuAppLaunchParams* params);
 
 /**
  * Get a given app's icon
@@ -233,7 +234,7 @@ int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params);
  * @param icon Pointer to RokuAppIcon to store the app icon
  * @return libsoup error code for active-app request, or -1 if the device is in Limited mode, or -2 if the device has ECP disabled.
  */
-int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon *icon);
+int getRokuAppIcon(const RokuDevice* device, const RokuApp* app, RokuAppIcon* icon);
 
 /**
  * Send custom input to the currently active app on a given Roku device
@@ -243,7 +244,7 @@ int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon *ic
  * @param values Array (size params) of strings with the values of the parameters
  * @return Result of input POST request, or -1 if the device is in limited mode, or -2 if the device has ECP disabled.
  */
-int sendCustomRokuInput(const RokuDevice *device, size_t params, const char* names[], const char* values[]);
+int sendCustomRokuInput(const RokuDevice* device, size_t params, const char* names[], const char* values[]);
 
 /**
  * Run search for a movie, TV show, person, or app. Either display the results or auto-launch the first one.
@@ -253,7 +254,7 @@ int sendCustomRokuInput(const RokuDevice *device, size_t params, const char* nam
  * @param params Pointer to RokuSearchParams describing the parameters of the search
  * @return Result of search POST request, or -1 if device does not support searches, or -2 if keyword is empty
 */
-int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchParams *params);
+int rokuSearch(const RokuDevice* device, const char* keyword, const RokuSearchParams* params);
 
 /**
  * Send Unicode string to Roku device as a series of keyboard keypresses
@@ -263,6 +264,6 @@ int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchPa
  * @param string Wide Unicode string to send
  * @return Result of the last keypress request, or -1 if the device is in Limited mode, or -2 if the device has ECP disabled.
  */
-int rokuTypeString(const RokuDevice *device, const wchar_t* string);
+int rokuTypeString(const RokuDevice* device, const wchar_t* string);
 
 #endif //ROKUECP_H

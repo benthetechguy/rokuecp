@@ -14,9 +14,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "rokuecp.h"
-#include <libgssdp/gssdp.h>
-#include <libsoup/soup.h>
-#include <libxml/parser.h>
+#include <libgssdp/gssdp-resource-browser.h>
+#include <libsoup/soup-session.h>
+#include <libxml/tree.h>
 
 // Not all platforms have strlcpy (ahem... MinGW)
 #ifdef NO_STRLCPY
@@ -152,10 +152,10 @@ static void fillFromXML(const xmlNode* parentElement, bool attrMode, struct xmlE
     }
 }
 
-int findRokuDevices(const size_t maxDevices, const size_t urlStringSize, char* deviceList[]) {
+int findRokuDevices(const char* interface, const size_t maxDevices, const size_t urlStringSize, char* deviceList[]) {
     // Set up gssdp to look for Roku devices
     GError* error = NULL;
-    GSSDPClient* ssdpClient = gssdp_client_new_for_address(NULL, 0, GSSDP_UDA_VERSION_1_0, &error);
+    GSSDPClient* ssdpClient = gssdp_client_new_full(interface, NULL, 0, GSSDP_UDA_VERSION_1_0, &error);
     if (error) {
         int errorCode = error->code;
         g_object_unref(ssdpClient);
@@ -250,7 +250,7 @@ int getRokuDevice(const char* url, RokuDevice* device) {
     return 0;
 }
 
-int rokuSendKey(const RokuDevice *device, const char* key) {
+int rokuSendKey(const RokuDevice* device, const char* key) {
     // Disallow sending keys meant for TVs to non-TV devices
     if (!device->isTV) {
         for (int i = 0; i < 12; i++) {
@@ -277,7 +277,7 @@ int rokuSendKey(const RokuDevice *device, const char* key) {
     return result;
 }
 
-int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVChannel channelList[]) {
+int getRokuTVChannels(const RokuDevice* device, const int maxChannels, RokuTVChannel channelList[]) {
     if (!device->isTV) {
         return -4;
     }
@@ -350,7 +350,7 @@ int getRokuTVChannels(const RokuDevice *device, const int maxChannels, RokuTVCha
     return channelsFound;
 }
 
-int getActiveRokuTVChannel(const RokuDevice *device, RokuExtTVChannel* channel) {
+int getActiveRokuTVChannel(const RokuDevice* device, RokuExtTVChannel* channel) {
     if (!device->isTV) {
         return -3;
     }
@@ -481,7 +481,7 @@ int launchRokuTVChannel(const RokuDevice* device, const RokuTVChannel* channel) 
     return launchRokuApp(device, &launchParams);
 }
 
-int getRokuApps(const RokuDevice *device, const int maxApps, RokuApp appList[]) {
+int getRokuApps(const RokuDevice* device, const int maxApps, RokuApp appList[]) {
     if (device->isLimited) {
         return -4;
     }
@@ -544,7 +544,7 @@ int getRokuApps(const RokuDevice *device, const int maxApps, RokuApp appList[]) 
     return appsFound;
 }
 
-int getActiveRokuApp(const RokuDevice *device, RokuApp* app) {
+int getActiveRokuApp(const RokuDevice* device, RokuApp* app) {
     // Request active-app from device and check for errors
     char queryURL[(sizeof(device->url) + sizeof("/query/active-app")) / sizeof(char) - 1];
     strcpy(queryURL, device->url);
@@ -602,7 +602,7 @@ int getActiveRokuApp(const RokuDevice *device, RokuApp* app) {
     return 0;
 }
 
-int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params) {
+int launchRokuApp(const RokuDevice* device, const RokuAppLaunchParams* params) {
     GString* url = g_string_sized_new((strlen(device->url) + strlen(params->appID)) * sizeof(char) + sizeof("/launch/"));
     g_string_assign(url, device->url);
     g_string_append(url, "/launch/");
@@ -670,7 +670,7 @@ int launchRokuApp(const RokuDevice *device, const RokuAppLaunchParams* params) {
     return httpError;
 }
 
-int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* icon) {
+int getRokuAppIcon(const RokuDevice* device, const RokuApp* app, RokuAppIcon* icon) {
     if (device->isLimited) {
         return -1;
     }
@@ -693,7 +693,7 @@ int getRokuAppIcon(const RokuDevice *device, const RokuApp *app, RokuAppIcon* ic
     return httpError;
 }
 
-int sendCustomRokuInput(const RokuDevice *device, const size_t params, const char* names[], const char* values[]) {
+int sendCustomRokuInput(const RokuDevice* device, const size_t params, const char* names[], const char* values[]) {
     if (device->isLimited) {
         return -1;
     }
@@ -720,7 +720,7 @@ int sendCustomRokuInput(const RokuDevice *device, const size_t params, const cha
     return httpError;
 }
 
-int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchParams *params) {
+int rokuSearch(const RokuDevice* device, const char* keyword, const RokuSearchParams* params) {
     if (!device->hasSearchSupport || device->isLimited) {
         return -1;
     }
@@ -792,7 +792,7 @@ int rokuSearch(const RokuDevice *device, const char* keyword, const RokuSearchPa
     return httpError;
 }
 
-int rokuTypeString(const RokuDevice *device, const wchar_t* string) {
+int rokuTypeString(const RokuDevice* device, const wchar_t* string) {
     if (device->isLimited) {
         return -1;
     }
