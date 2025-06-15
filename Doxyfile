@@ -2,8 +2,8 @@
 DOXYFILE_ENCODING      = UTF-8
 
 PROJECT_NAME           = "RokuECP"
-PROJECT_NUMBER         = 0.1
-PROJECT_BRIEF          = "Control Roku devices remotely with ECP"
+PROJECT_NUMBER         = 0.2.0
+PROJECT_BRIEF          = "Interact with Roku devices using ECP"
 PROJECT_ICON           = controku.png
 
 OUTPUT_DIRECTORY       = docs
@@ -34,7 +34,7 @@ TAB_SIZE               = 4
 
 ALIASES                =
 
-OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
 OPTIMIZE_OUTPUT_VHDL   = NO
@@ -291,7 +291,7 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = __cplusplus
+PREDEFINED             =
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 

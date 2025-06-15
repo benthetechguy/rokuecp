@@ -1,5 +1,5 @@
 ## RokuECP
-C library to control Roku devices remotely with ECP.  
+C library to interact with Roku devices remotely with ECP.
 
 ### Dependencies
 * libsoup 3
