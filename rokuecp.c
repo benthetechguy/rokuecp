@@ -1,5 +1,5 @@
 /*
- * rokuecp: Interact with Roku devices using ECP
+ * RokuECP: Interact with Roku devices using ECP.
  * Copyright 2025 Ben Westover <me@benthetechguy.net>
  *
  * This program is free software: you can redistribute it and/or modify

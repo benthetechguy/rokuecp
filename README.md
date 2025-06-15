@@ -40,7 +40,7 @@ int main() {
 ```
 
 ### API Reference
-A complete API reference is available at https://benthetechguy.github.io/rokuecp/namespacerokuecp.html
+A complete API reference is available at https://benthetechguy.github.io/rokuecp/rokuecp_8h.html
 
 ### Build and install
 ```

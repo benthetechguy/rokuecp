@@ -1,5 +1,5 @@
-/*
- * rokuecp: Interact with Roku devices using ECP
+/** @file rokuecp.h
+ * RokuECP: Interact with Roku devices using ECP.
  * Copyright 2025 Ben Westover <me@benthetechguy.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <wchar.h>
 
-/** Information about a Roku Device */
+/** Information about a Roku Device. */
 typedef struct {
     char name[121]; /**< Name of the device, up to Roku's 120-character maximum */
     char location[61]; /**< Location of the device (like "Bedroom") up to Roku's 60-character maximum */
@@ -42,7 +42,7 @@ typedef struct {
     char softwareVersion[10]; /**< Device software version, up to 9 characters */
 } RokuDevice;
 
-/** Information about a TV channel on a Roku device */
+/** Information about a TV channel on a Roku device. */
 typedef struct {
     char id[8]; /**< Channel ID, usually the channel number (like "3.1"), up to 7 characters */
     char name[8]; /**< Channel short name, up to 7 characters */
@@ -52,7 +52,7 @@ typedef struct {
     unsigned long frequency; /**< integer channel frequency in Hz (54-806 million) */
 } RokuTVChannel;
 
-/** Information about a TV program on a Roku device */
+/** Information about a TV program on a Roku device. */
 typedef struct {
     char title[112]; /**< Program title, up to 111 characters */
     char description[256]; /**< Program description, up to 255 characters */
@@ -65,7 +65,7 @@ typedef struct {
  * This info is only available if the channel is currently active.
  */
 typedef struct {
-    RokuTVChannel channel; /**< The base channel info */
+    RokuTVChannel channel; /**< Base channel info */
     /**
      * true if the channel is currently playing on the TV. If false,
      * nothing but the channel attribute will be populated.
@@ -79,7 +79,7 @@ typedef struct {
     int8_t signalStrength; /**< Signal strength in dB */
 } RokuExtTVChannel;
 
-/** Information about a Roku channel (app) */
+/** Information about a Roku channel (app). */
 typedef struct {
     char id[14]; /**< Roku app ID, up to 13 characters */
     char name[31]; /**< App name, up to 30 characters */
@@ -87,7 +87,7 @@ typedef struct {
     char version[22]; /**< App version, up to 21 characters */
 } RokuApp;
 
-/** A Roku channel (app) icon */
+/** A Roku channel (app) icon. */
 typedef struct {
     const unsigned char* data; /**< pointer to icon data */
     unsigned long size; /**< number of bytes pointed to by the data attribute */
@@ -111,6 +111,7 @@ typedef struct {
     char providerIDs[14][8]; /**< array of up to 8 Roku app IDs (up to 13 characters) for providers to look for results from (like "12" for Netflix) */
 } RokuSearchParams;
 
+/** Parameters for Roku app launch command. All fields except appID are optional. */
 typedef struct {
     char appID[14]; /**< ID of Roku app to launch, up to 13 characters */
     char contentID[256]; /**< Optional unique identifier for a specific piece of content (empty string if none) up to 255 characters */
@@ -129,7 +130,7 @@ typedef struct {
 } RokuAppLaunchParams;
 
 /**
- * Find Roku devices on the network using SSDP
+ * Find Roku devices on the network using SSDP.
  * @param interface Name of network interface to search on. Set NULL to auto-select the primary interface.
  * @param maxDevices Maximum number of devices to look for
  * @param urlStringSize Size of destination URL strings (recommended 30)
@@ -140,57 +141,57 @@ typedef struct {
 int findRokuDevices(const char* interface, size_t maxDevices, size_t urlStringSize, char* deviceList[]);
 
 /**
- * Get information about a Roku Device from its ECP URL
+ * Get information about a Roku Device from its ECP URL.
  * @param url The Roku Device's ECP URL (like "http://192.168.1.162:8060/")
  * @param device RokuDevice pointer to store device info in
- * @return libsoup error code for device-info request, or one of the following error codes: -1 if XML parsing failed
- *                                                                                        , -2 if the device info is empty
- *                                                                                        , -3 if the device has ECP disabled.
+ * @return libsoup error code for device-info request, or one of the following error codes: -1 if XML parsing failed,
+ *                                                                                          -2 if the device info is empty,
+ *                                                                                          -3 if the device has ECP disabled.
  */
 int getRokuDevice(const char* url, RokuDevice* device);
 
 /**
- * Send a keypress to a Roku Device, emulating the press of a button on a Roku Remote
+ * Send a keypress to a Roku Device, emulating the press of a button on a Roku Remote.
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice to send the keypress to
  * @param key The key code to send to the Roku. Accepted keys are listed at
  *            https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md#keypress-key-values.
- * @return Result of POST request or one of the following error codes: -1 if the selected key isn't valid for that device type
- *                                                                   , -2 if the device is in Limited mode,
- *                                                                   , -3 if the device has ECP disabled.
+ * @return libsoup error code for keypress request, or one of the following error codes: -1 if the selected key isn't valid for that device type,
+ *                                                                                       -2 if the device is in Limited mode,
+ *                                                                                       -3 if the device has ECP disabled.
  */
 int rokuSendKey(const RokuDevice* device, const char* key);
 
 /**
- * Get a list of TV channels accessible from a given Roku device
+ * Get a list of TV channels accessible from a given Roku device.
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice to list the channels of
  * @param maxChannels Maximum number of channels to list
  * @param channelList Array (of size maxChannels) of RokuTVChannels which will be updated to contain listed channels
- * @return Number of channels found, or one of the following error codes: -1 if the GET request failed
- *                                                                      , -2 if XML parsing failed
- *                                                                      , -3 if channel list is empty
- *                                                                      , -4 if the device is not a TV
- *                                                                      , -5 if the device is in Limited mode
- *                                                                      , -6 if the device has ECP disabled.
+ * @return Number of channels found, or one of the following error codes: -1 if the GET request failed,
+ *                                                                        -2 if XML parsing failed,
+ *                                                                        -3 if channel list is empty,
+ *                                                                        -4 if the device is not a TV,
+ *                                                                        -5 if the device is in Limited mode,
+ *                                                                        -6 if the device has ECP disabled.
  */
 int getRokuTVChannels(const RokuDevice* device, int maxChannels, RokuTVChannel channelList[]);
 
 /**
- * Get either the current or last active TV channel on a given Roku device
+ * Get either the current or last active TV channel on a given Roku device.
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice to list the active channel of
  * @param channel Pointer to RokuExtTVChannel to store info about the current or last active TV channel
- * @return libsoup error code for tv-active-channel request, or one of the following error codes: -1 if XML parsing failed
- *                                                                                              , -2 if channel element is empty
- *                                                                                              , -3 if the device is not a TV
- *                                                                                              , -4 if the device is in Limited mode
- *                                                                                              , -5 if the device has ECP disabled.
+ * @return libsoup error code for tv-active-channel request, or one of the following error codes: -1 if XML parsing failed,
+ *                                                                                                -2 if channel element is empty,
+ *                                                                                                -3 if the device is not a TV,
+ *                                                                                                -4 if the device is in Limited mode,
+ *                                                                                                -5 if the device has ECP disabled.
  */
 int getActiveRokuTVChannel(const RokuDevice* device, RokuExtTVChannel* channel);
 
 /**
- * Launch a given Live TV channel on a given Roku device
+ * Launch a given Live TV channel on a given Roku device.
  * @param device Pointer to RokuDevice to launch channel on
  * @param channel Pointer to RokuTVChannel to launch
  * @return libsoup error code for launch request, or -1 if the device has ECP disabled, or -2 if the device is not a TV.
@@ -198,31 +199,31 @@ int getActiveRokuTVChannel(const RokuDevice* device, RokuExtTVChannel* channel);
 int launchRokuTVChannel(const RokuDevice* device, const RokuTVChannel* channel);
 
 /**
- * Get a list of apps on a given Roku device
+ * Get a list of apps on a given Roku device.
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice to list the apps on
  * @param maxApps Maximum number of apps to list
  * @param appList Array (of size maxApps) of RokuApps which will be updated to contain listed apps
- * @return Number of apps found, or one of the following error codes: -1 if the GET request failed
- *                                                                  , -2 if XML parsing failed
- *                                                                  , -3 if app list is empty
- *                                                                  , -4 if the device is in Limited mode
- *                                                                  , -5 if the device has ECP disabled.
+ * @return Number of apps found, or one of the following error codes: -1 if the GET request failed,
+ *                                                                    -2 if XML parsing failed,
+ *                                                                    -3 if app list is empty,
+ *                                                                    -4 if the device is in Limited mode,
+ *                                                                    -5 if the device has ECP disabled.
 */
 int getRokuApps(const RokuDevice* device, int maxApps, RokuApp appList[]);
 
 /**
- * Get the current active app on a given Roku device
+ * Get the current active app on a given Roku device.
  * @param device Pointer to RokuDevice to list the active app of
  * @param app Pointer to RokuApp to store info about the current active app (Home if no app is active)
- * @return libsoup error code for active-app request, or one of the following error codes: -1 if XML parsing failed
- *                                                                                       , -2 if app element is empty
- *                                                                                       , -3 if the device has ECP disabled.
+ * @return libsoup error code for active-app request, or one of the following error codes: -1 if XML parsing failed,
+ *                                                                                         -2 if app element is empty,
+ *                                                                                         -3 if the device has ECP disabled.
  */
 int getActiveRokuApp(const RokuDevice* device, RokuApp* app);
 
 /**
- * Launch a given app on a given Roku device
+ * Launch a given app on a given Roku device.
  * @param device Pointer to RokuDevice to launch the app on
  * @param params App ID and optional parameters to launch with
  * @return libsoup error code for launch request, or -1 if the device has ECP disabled.
@@ -230,7 +231,7 @@ int getActiveRokuApp(const RokuDevice* device, RokuApp* app);
 int launchRokuApp(const RokuDevice* device, const RokuAppLaunchParams* params);
 
 /**
- * Get a given app's icon
+ * Get a given app's icon.
  * @note This does not work if the device is in Limited mode.
  * @param device Pointer to RokuDevice on which the app is installed
  * @param app Pointer to RokuApp to get the icon of
@@ -240,12 +241,12 @@ int launchRokuApp(const RokuDevice* device, const RokuAppLaunchParams* params);
 int getRokuAppIcon(const RokuDevice* device, const RokuApp* app, RokuAppIcon* icon);
 
 /**
- * Send custom input to the currently active app on a given Roku device
+ * Send custom input to the currently active app on a given Roku device.
  * @param device Pointer to RokuDevice to send input to
  * @param params Number of parameters to send
  * @param names Array (size params) of strings with the names of the parameters
  * @param values Array (size params) of strings with the values of the parameters
- * @return Result of input POST request, or -1 if the device is in limited mode, or -2 if the device has ECP disabled.
+ * @return libsoup error code for input request, or -1 if the device is in limited mode, or -2 if the device has ECP disabled.
  */
 int sendCustomRokuInput(const RokuDevice* device, size_t params, const char* names[], const char* values[]);
 
@@ -255,17 +256,17 @@ int sendCustomRokuInput(const RokuDevice* device, size_t params, const char* nam
  * @param device Pointer to RokuDevice to run the search on
  * @param keyword Movie/show title, app name, person name, or other keyword to be searched
  * @param params Pointer to RokuSearchParams describing the parameters of the search
- * @return Result of search POST request, or -1 if device does not support searches, or -2 if keyword is empty
+ * @return libsoup error code for search request, or -1 if device does not support searches, or -2 if keyword is empty.
 */
 int rokuSearch(const RokuDevice* device, const char* keyword, const RokuSearchParams* params);
 
 /**
- * Send Unicode string to Roku device as a series of keyboard keypresses
+ * Send Unicode string to Roku device as a series of keyboard keypresses.
  * @note This does not work if the device is in Limited mode.
  * @note This function depends on locale. Many special characters will fail to send if the standard C locale is used.
  * @param device Pointer to RokuDevice to send the string to
  * @param string Wide Unicode string to send
- * @return Result of the last keypress request, or -1 if the device is in Limited mode, or -2 if the device has ECP disabled.
+ * @return libsoup error code for the last keypress request, or -1 if the device is in Limited mode, or -2 if the device has ECP disabled.
  */
 int rokuTypeString(const RokuDevice* device, const wchar_t* string);
 

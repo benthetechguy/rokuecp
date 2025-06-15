@@ -11,6 +11,26 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install doxygen
+        shell: bash
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DDOCS=on -DDOCS_ONLY=on
+
+      - name: Generate documentation
+        run: cmake --build ${{github.workspace}}/build --target doc
+
+      - name: Create .nojekyll (ensures pages with underscores work on gh pages)
+        run: touch ${{github.workspace}}/build/html/.nojekyll
+        shell: bash
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ${{github.workspace}}/build/html
