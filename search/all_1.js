@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['channel_0',['channel',['../structrokuecp_1_1RokuExtTVChannel.html#ab8a94c18c522ed3080b599c155042810',1,'rokuecp::RokuExtTVChannel']]]
+  ['build_20and_20install_0',['Build and install',['../index.html#autotoc_md5',1,'']]]
 ];

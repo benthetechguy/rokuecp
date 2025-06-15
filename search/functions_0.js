@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['findrokudevices_0',['findRokuDevices',['../namespacerokuecp.html#a38a04aa775614f39eb73b2f5bc3875a7',1,'rokuecp']]]
+  ['findrokudevices_0',['findRokuDevices',['../rokuecp_8h.html#a00ef7431682dc98384dda6c33be7f6c3',1,'rokuecp.c']]]
 ];

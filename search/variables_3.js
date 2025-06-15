@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['frequency_0',['frequency',['../structrokuecp_1_1RokuTVChannel.html#a41a4ace82649d4ab6b1b3d4ffa3fd463',1,'rokuecp::RokuTVChannel']]]
+  ['frequency_0',['frequency',['../structRokuTVChannel.html#a7eeb0c6aded1561f1a88f3310a2ad093',1,'RokuTVChannel']]]
 ];

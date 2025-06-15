@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['hascc_0',['hasCC',['../structrokuecp_1_1RokuTVProgram.html#aab1c2cfc676a6ccaa1eca9d60813cf84',1,'rokuecp::RokuTVProgram']]],
-  ['hasheadphonesupport_1',['hasHeadphoneSupport',['../structrokuecp_1_1RokuDevice.html#afe049fb06226289e8ef233eade64bef5',1,'rokuecp::RokuDevice']]],
-  ['hassearchsupport_2',['hasSearchSupport',['../structrokuecp_1_1RokuDevice.html#a37caa87415496c8ebaad6e44d3d2df5a',1,'rokuecp::RokuDevice']]],
-  ['headphonesconnected_3',['headphonesConnected',['../structrokuecp_1_1RokuDevice.html#ad7968647f9d2aff8808497fa20d3aaad',1,'rokuecp::RokuDevice']]]
+  ['hascc_0',['hasCC',['../structRokuTVProgram.html#a5a3112db6d0d4a425828891e35c98252',1,'RokuTVProgram']]],
+  ['hasheadphonesupport_1',['hasHeadphoneSupport',['../structRokuDevice.html#a27eca90345ca82734b1e1800efffa84d',1,'RokuDevice']]],
+  ['hassearchsupport_2',['hasSearchSupport',['../structRokuDevice.html#ad406af93be8d9e8dd5a393cb3f4f510e',1,'RokuDevice']]],
+  ['headphonesconnected_3',['headphonesConnected',['../structRokuDevice.html#af6b48e226b32d02e869a5e668d4ac712',1,'RokuDevice']]]
 ];

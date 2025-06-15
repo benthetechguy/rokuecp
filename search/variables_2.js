@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['data_0',['data',['../structrokuecp_1_1RokuAppIcon.html#a1e9a68e05aa252d943c0ce42386e16bb',1,'rokuecp::RokuAppIcon']]],
-  ['description_1',['description',['../structrokuecp_1_1RokuTVProgram.html#a2061e4281efe74a0e4d0238e471cbee0',1,'rokuecp::RokuTVProgram']]],
-  ['developermode_2',['developerMode',['../structrokuecp_1_1RokuDevice.html#a3ad2210108c89064e9e11b2f33f5aea6',1,'rokuecp::RokuDevice']]]
+  ['data_0',['data',['../structRokuAppIcon.html#a5d6f9dbfb49c53334715e8318f2757f5',1,'RokuAppIcon']]],
+  ['description_1',['description',['../structRokuTVProgram.html#a53ce5b2d1d65e17d6a8b06f73b5bf553',1,'RokuTVProgram']]],
+  ['developermode_2',['developerMode',['../structRokuDevice.html#a56ad901c7ebb829fb11db4ae4caa2d24',1,'RokuDevice']]]
 ];

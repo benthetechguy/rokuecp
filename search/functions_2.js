@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['rokusearch_0',['rokuSearch',['../namespacerokuecp.html#a6921d2fb8c5b060cb52c9a8c49d6ead2',1,'rokuecp']]],
-  ['rokusendkey_1',['rokuSendKey',['../namespacerokuecp.html#a0d8f48f85d1a9579ba9dda4964a2ce16',1,'rokuecp']]],
-  ['rokutypestring_2',['rokuTypeString',['../namespacerokuecp.html#a108aff31a80912ceaa506cb6b3cce2de',1,'rokuecp']]]
+  ['launchrokuapp_0',['launchRokuApp',['../rokuecp_8h.html#a6787cd2b1cd10110b21332ddd06932fd',1,'rokuecp.c']]],
+  ['launchrokutvchannel_1',['launchRokuTVChannel',['../rokuecp_8h.html#a6a9f7d830e597f8fdabc39df1a21e6a7',1,'rokuecp.c']]]
 ];

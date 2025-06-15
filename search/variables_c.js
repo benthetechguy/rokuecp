@@ -1,6 +1,10 @@
 var searchData=
 [
-  ['title_0',['title',['../structrokuecp_1_1RokuTVProgram.html#ad2fe3977eb0701606110b05573a685fa',1,'rokuecp::RokuTVProgram']]],
-  ['tmsid_1',['tmsID',['../structrokuecp_1_1RokuSearchParams.html#aa6adaa6123fd6607f932755cacf3caa3',1,'rokuecp::RokuSearchParams']]],
-  ['type_2',['type',['../structrokuecp_1_1RokuTVChannel.html#a6cf205f2ea8c97e0dcee1e8b8d3aa2cb',1,'rokuecp::RokuTVChannel::type()'],['../structrokuecp_1_1RokuApp.html#acb320d3ff26360c023d72871370cde7e',1,'rokuecp::RokuApp::type()'],['../structrokuecp_1_1RokuSearchParams.html#a38bdef5d02ba35c82a0f71a3abfa26ef',1,'rokuecp::RokuSearchParams::type()']]]
+  ['season_0',['season',['../structRokuSearchParams.html#a0ba6814070dfdc28d658be7cd7afe695',1,'RokuSearchParams']]],
+  ['serial_1',['serial',['../structRokuDevice.html#a3a2a221dcc08b86c56591e873f2bb572',1,'RokuDevice']]],
+  ['signalquality_2',['signalQuality',['../structRokuExtTVChannel.html#a9ede6b0d4446443a3d0a06bf3da521e2',1,'RokuExtTVChannel']]],
+  ['signalreceived_3',['signalReceived',['../structRokuExtTVChannel.html#ab9eb2267a490ef70b1a715a674cccf81',1,'RokuExtTVChannel']]],
+  ['signalstrength_4',['signalStrength',['../structRokuExtTVChannel.html#a81fa0fbdd5ee590f52d0ce1b2bf5b429',1,'RokuExtTVChannel']]],
+  ['size_5',['size',['../structRokuAppIcon.html#a3c9de4e82de7f10d38bae7ef87db4238',1,'RokuAppIcon']]],
+  ['softwareversion_6',['softwareVersion',['../structRokuDevice.html#a8416e4b3fe3fa2c12d79567fefdf58f1',1,'RokuDevice']]]
 ];

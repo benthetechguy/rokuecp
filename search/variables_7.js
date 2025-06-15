@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['macaddress_0',['macAddress',['../structrokuecp_1_1RokuDevice.html#ac0236e814938b3dcc427227c6de26529',1,'rokuecp::RokuDevice']]],
-  ['model_1',['model',['../structrokuecp_1_1RokuDevice.html#ad757e5cc9a03c0c9c2361fd32a294a20',1,'rokuecp::RokuDevice']]]
+  ['macaddress_0',['macAddress',['../structRokuDevice.html#ae0ff19708cd8c6e6283ad94f4dde00a5',1,'RokuDevice']]],
+  ['mediatype_1',['mediaType',['../structRokuAppLaunchParams.html#aca9c29ec59da731776b81fbb45692133',1,'RokuAppLaunchParams']]],
+  ['model_2',['model',['../structRokuDevice.html#acf1a12b6a3494f0612af09b8a483b504',1,'RokuDevice']]]
 ];

@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['findrokudevices_0',['findRokuDevices',['../namespacerokuecp.html#a38a04aa775614f39eb73b2f5bc3875a7',1,'rokuecp']]],
-  ['frequency_1',['frequency',['../structrokuecp_1_1RokuTVChannel.html#a41a4ace82649d4ab6b1b3d4ffa3fd463',1,'rokuecp::RokuTVChannel']]]
+  ['data_0',['data',['../structRokuAppIcon.html#a5d6f9dbfb49c53334715e8318f2757f5',1,'RokuAppIcon']]],
+  ['dependencies_1',['Dependencies',['../index.html#autotoc_md1',1,'']]],
+  ['description_2',['description',['../structRokuTVProgram.html#a53ce5b2d1d65e17d6a8b06f73b5bf553',1,'RokuTVProgram']]],
+  ['developermode_3',['developerMode',['../structRokuDevice.html#a56ad901c7ebb829fb11db4ae4caa2d24',1,'RokuDevice']]]
 ];

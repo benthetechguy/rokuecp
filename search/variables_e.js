@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['version_0',['version',['../structrokuecp_1_1RokuApp.html#a92d0650d385e3697b3e5a63167594a0b',1,'rokuecp::RokuApp']]]
+  ['url_0',['url',['../structRokuDevice.html#aa072f37756f7f1c8dbdecd568cc09822',1,'RokuDevice']]]
 ];

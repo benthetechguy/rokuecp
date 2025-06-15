@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['physicalchannel_0',['physicalChannel',['../structrokuecp_1_1RokuTVChannel.html#a5ef59b1f54257d05698f8281831c5068',1,'rokuecp::RokuTVChannel']]],
-  ['program_1',['program',['../structrokuecp_1_1RokuExtTVChannel.html#ade36a0b82ee6104954a5092268b956c8',1,'rokuecp::RokuExtTVChannel']]],
-  ['providerids_2',['providerIDs',['../structrokuecp_1_1RokuSearchParams.html#af3d14c91627909dc72f5f35cb67928ef',1,'rokuecp::RokuSearchParams']]]
+  ['otherparamnames_0',['otherParamNames',['../structRokuAppLaunchParams.html#a73ea60b3f1e713d8b406c03bab24034c',1,'RokuAppLaunchParams']]],
+  ['otherparamvalues_1',['otherParamValues',['../structRokuAppLaunchParams.html#a48f2dea3c3d2bffa0ddecb2780db7884',1,'RokuAppLaunchParams']]]
 ];
