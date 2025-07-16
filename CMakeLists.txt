@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(rokuecp VERSION 0.2.0)
+project(rokuecp VERSION 0.2.1-dev)
 set(CMAKE_C_STANDARD 11)
 option(DOCS "Generate documentation" off)
 option(DOCS_ONLY "Skip build and generate docs only" off)
@@ -25,7 +25,7 @@ endif()
 if(NOT DOCS_ONLY)
     add_library(rokuecp SHARED rokuecp.c)
     set_target_properties(rokuecp PROPERTIES
-        VERSION 0.2.0
+        VERSION 0.2.1-dev
         SOVERSION 0
         PUBLIC_HEADER rokuecp.h
     )
@@ -50,8 +50,8 @@ if(NOT DOCS_ONLY)
 
     configure_file(rokuecp.pc.in rokuecp.pc @ONLY)
     install(TARGETS rokuecp
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION include)
-    install(FILES "${CMAKE_BINARY_DIR}/rokuecp.pc" DESTINATION lib/pkgconfig)
+    install(FILES "${CMAKE_BINARY_DIR}/rokuecp.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
