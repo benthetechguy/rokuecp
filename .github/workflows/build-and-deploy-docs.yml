@@ -1,0 +1,54 @@
+name: Build and deploy docs on GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # using MSYS2 until Ubuntu LTS gets libxml2 2.13
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-doxygen mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-libxml2 mingw-w64-ucrt-x86_64-libsoup3 mingw-w64-ucrt-x86_64-gssdp
+      - name: Cache build directory
+        uses: actions/cache@v4
+        with:
+          path: ./build
+          key: ${{ runner.os }}-cache-${{ github.sha }}
+      - name: Configure CMake
+        run: cmake -B ./build -DDOCS=on
+      - name: Build
+        run: cmake --build ./build
+
+  deploy-docs:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Get build from cache
+        uses: actions/cache@v4
+        with:
+          path: ./build
+          key: ${{ runner.os }}-cache-${{ github.sha }}
+      - name: Create .nojekyll (ensures pages with underscores work on gh pages)
+        run: touch ./build/html/.nojekyll
+        shell: bash
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ./build/html
