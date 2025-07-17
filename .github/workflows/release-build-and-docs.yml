@@ -108,7 +108,7 @@ jobs:
       - name: Install dependencies
         run: brew update && brew install doxygen gssdp libsoup libxml2
       - name: Configure CMake
-        run: PKG_CONFIG_PATH=/usr/local/opt/libxml2/lib/pkgconfig cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
+        run: PKG_CONFIG_PATH=/opt/homebrew/opt/libxml2/lib/pkgconfig cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
       - name: Build
         run: cmake --build build
       - name: Package tarball
