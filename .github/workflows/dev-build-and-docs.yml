@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    # using MSYS2 until Ubuntu LTS gets libxml2 2.13
+    # using Windows with MSYS2 until Ubuntu LTS gets libxml2 2.13
     runs-on: windows-latest
     defaults:
       run:
@@ -46,13 +46,10 @@ jobs:
           path: ./build
           key: cache-${{ github.sha }}
           enableCrossOsArchive: true
-      - name: Create .nojekyll (ensures pages with underscores work on gh pages)
-        run: touch ./build/html/.nojekyll
-        shell: bash
-
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: ./build/html
+          target-folder: dev
