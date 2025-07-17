@@ -41,8 +41,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rokuecp-${VER}_windows-x86_64-msys2-ucrt64
-          path: rokuecp-${VER}
+          name: rokuecp-${{ github.ref_name }}_windows-x86_64-msys2-ucrt64
+          path: rokuecp-*
 
   build-windows-arm64:
     runs-on: windows-11-arm
@@ -72,18 +72,18 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rokuecp-${VER}_windows-arm64-msys2-clangarm64
-          path: rokuecp-${VER}
+          name: rokuecp-${{ github.ref_name }}_windows-arm64-msys2-clangarm64
+          path: rokuecp-*
 
   build-macos-x86_64:
-    runs-on: macos-latest-large
+    runs-on: macos-13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Install dependencies
-        run: brew update && brew install cmake doxygen gssdp libsoup libxml2
+        run: brew update && brew install doxygen gssdp libsoup libxml2
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
+        run: PKG_CONFIG_PATH=/usr/local/opt/libxml2/lib/pkgconfig cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
       - name: Build
         run: cmake --build build
       - name: Package tarball
@@ -97,8 +97,8 @@ jobs:
       - name: Upload tarball as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rokuecp-${VER}_macos-x86_64.tar.gz
-          path: rokuecp-${VER}_macos-x86_64.tar.gz
+          name: rokuecp-${{ github.ref_name }}_macos-x86_64.tar.gz
+          path: rokuecp-*_macos-x86_64.tar.gz
 
   build-macos-arm64:
     runs-on: macos-latest
@@ -106,9 +106,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Install dependencies
-        run: brew update && brew install cmake doxygen gssdp libsoup libxml2
+        run: brew update && brew install doxygen gssdp libsoup libxml2
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
+        run: PKG_CONFIG_PATH=/usr/local/opt/libxml2/lib/pkgconfig cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
       - name: Build
         run: cmake --build build
       - name: Package tarball
@@ -122,8 +122,8 @@ jobs:
       - name: Upload tarball as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rokuecp-${VER}_macos-arm64.tar.gz
-          path: rokuecp-${VER}_macos-arm64.tar.gz
+          name: rokuecp-${{ github.ref_name }}_macos-arm64.tar.gz
+          path: rokuecp-*_macos-arm64.tar.gz
 
   # Disabled until Ubuntu LTS gets libxml2 2.13
   # build-linux-x86_64:
@@ -132,7 +132,7 @@ jobs:
   #     - name: Checkout repository
   #       uses: actions/checkout@v3
   #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y install cmake doxygen libgssdp-1.6-dev libsoup-3.0-dev libxml2-dev
+  #       run: sudo apt-get update && sudo apt-get -y install doxygen libgssdp-1.6-dev libsoup-3.0-dev libxml2-dev
   #     - name: Configure CMake
   #       run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
   #     - name: Build
@@ -148,8 +148,8 @@ jobs:
   #     - name: Upload tarball as artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: rokuecp-${VER}_linux-x86_64.tar.gz
-  #         path: rokuecp-${VER}_linux-x86_64.tar.gz
+  #         name: rokuecp-${{ github.ref_name }}_linux-x86_64.tar.gz
+  #         path: rokuecp-*_linux-x86_64.tar.gz
   #
   # build-linux-arm64:
   #   runs-on: ubuntu-26.04-arm
@@ -157,7 +157,7 @@ jobs:
   #     - name: Checkout repository
   #       uses: actions/checkout@v3
   #     - name: Install dependencies
-  #       run: sudo apt-get update && sudo apt-get -y install cmake doxygen libgssdp-1.6-dev libsoup-3.0-dev libxml2-dev
+  #       run: sudo apt-get update && sudo apt-get -y install doxygen libgssdp-1.6-dev libsoup-3.0-dev libxml2-dev
   #     - name: Configure CMake
   #       run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DDOCS=on
   #     - name: Build
@@ -173,8 +173,8 @@ jobs:
   #     - name: Upload tarball as artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: rokuecp-${VER}_linux-arm64.tar.gz
-  #         path: rokuecp-${VER}_linux-arm64.tar.gz
+  #         name: rokuecp-${{ github.ref_name }}_linux-arm64.tar.gz
+  #         path: rokuecp-*_linux-arm64.tar.gz
 
   deploy-docs:
     runs-on: ubuntu-latest
@@ -192,15 +192,10 @@ jobs:
           key: cache-${{ github.sha }}
           # Remove when Linux build is enabled
           enableCrossOsArchive: true
-      - name: Get release version
-        run: |
-          VER=${GITHUB_REF_NAME#v}
-          echo "Version: $VER"
-          echo "VER=$VER" >> $GITHUB_ENV
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: ./build/html
-          target-folder: ${VER}
+          target-folder: ${{ github.ref_name }}
