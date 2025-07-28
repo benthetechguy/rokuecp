@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">RokuECP<span id="projectnumber">&#160;0.2.0.20250716</span>
+   <div id="projectname">RokuECP<span id="projectnumber">&#160;0.2.0.20250728</span>
    </div>
   </td>
     <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -123,7 +123,7 @@ Example usage</h2>
 <div class="line">        urlList[i] = malloc(30);</div>
 <div class="line">    }</div>
 <div class="line">    <span class="comment">// Find Roku devices on local network and fill urlList</span></div>
-<div class="line">    <span class="keywordtype">int</span> devicesFound = <a class="code hl_function" href="rokuecp_8h.html#a00ef7431682dc98384dda6c33be7f6c3">findRokuDevices</a>(NULL, 4, 30, urlList);</div>
+<div class="line">    <span class="keywordtype">int</span> devicesFound = <a class="code hl_function" href="rokuecp_8h.html#a8710a6ddf77876474ef6aff86d756bda">findRokuDevices</a>(NULL, 4, 30, urlList);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Get info about found devices and print their names</span></div>
 <div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; devicesFound; i++) {</div>
@@ -138,7 +138,7 @@ Example usage</h2>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="ttc" id="arokuecp_8h_html"><div class="ttname"><a href="rokuecp_8h.html">rokuecp.h</a></div><div class="ttdoc">RokuECP: Interact with Roku devices using ECP.</div></div>
-<div class="ttc" id="arokuecp_8h_html_a00ef7431682dc98384dda6c33be7f6c3"><div class="ttname"><a href="rokuecp_8h.html#a00ef7431682dc98384dda6c33be7f6c3">findRokuDevices</a></div><div class="ttdeci">int findRokuDevices(const char *interface, size_t maxDevices, size_t urlStringSize, char *deviceList[])</div><div class="ttdoc">Find Roku devices on the network using SSDP.</div><div class="ttdef"><b>Definition</b> rokuecp.c:158</div></div>
+<div class="ttc" id="arokuecp_8h_html_a8710a6ddf77876474ef6aff86d756bda"><div class="ttname"><a href="rokuecp_8h.html#a8710a6ddf77876474ef6aff86d756bda">findRokuDevices</a></div><div class="ttdeci">int findRokuDevices(const char *iface, size_t maxDevices, size_t urlStringSize, char *deviceList[])</div><div class="ttdoc">Find Roku devices on the network using SSDP.</div><div class="ttdef"><b>Definition</b> rokuecp.c:158</div></div>
 <div class="ttc" id="arokuecp_8h_html_ac1e9d61278cb0d9fc848a13f90dcfa1c"><div class="ttname"><a href="rokuecp_8h.html#ac1e9d61278cb0d9fc848a13f90dcfa1c">getRokuDevice</a></div><div class="ttdeci">int getRokuDevice(const char *url, RokuDevice *device)</div><div class="ttdoc">Get information about a Roku Device from its ECP URL.</div><div class="ttdef"><b>Definition</b> rokuecp.c:187</div></div>
 <div class="ttc" id="astruct_roku_device_html"><div class="ttname"><a href="struct_roku_device.html">RokuDevice</a></div><div class="ttdoc">Information about a Roku Device.</div><div class="ttdef"><b>Definition</b> rokuecp.h:27</div></div>
 <div class="ttc" id="astruct_roku_device_html_ab3c95fd8ef12f1f9d5293e1bfde23f71"><div class="ttname"><a href="struct_roku_device.html#ab3c95fd8ef12f1f9d5293e1bfde23f71">RokuDevice::name</a></div><div class="ttdeci">char name[121]</div><div class="ttdoc">Name of the device, up to Roku&#39;s 120-character maximum.</div><div class="ttdef"><b>Definition</b> rokuecp.h:28</div></div>

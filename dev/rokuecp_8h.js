@@ -8,7 +8,7 @@ var rokuecp_8h =
     [ "RokuAppIcon", "struct_roku_app_icon.html", "struct_roku_app_icon" ],
     [ "RokuSearchParams", "struct_roku_search_params.html", "struct_roku_search_params" ],
     [ "RokuAppLaunchParams", "struct_roku_app_launch_params.html", "struct_roku_app_launch_params" ],
-    [ "findRokuDevices", "rokuecp_8h.html#a00ef7431682dc98384dda6c33be7f6c3", null ],
+    [ "findRokuDevices", "rokuecp_8h.html#a8710a6ddf77876474ef6aff86d756bda", null ],
     [ "getActiveRokuApp", "rokuecp_8h.html#a6cd62ff9b72c34dcfdc8a8a186eab6e5", null ],
     [ "getActiveRokuTVChannel", "rokuecp_8h.html#abc66555ac27662f12ac9685eac0c8111", null ],
     [ "getRokuAppIcon", "rokuecp_8h.html#a0695db680b1989eb4c9ee0a308934b5e", null ],

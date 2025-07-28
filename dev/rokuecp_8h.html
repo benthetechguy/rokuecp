@@ -30,7 +30,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">RokuECP<span id="projectnumber">&#160;0.2.0.20250716</span>
+   <div id="projectname">RokuECP<span id="projectnumber">&#160;0.2.0.20250728</span>
    </div>
   </td>
     <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -125,8 +125,8 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a00ef7431682dc98384dda6c33be7f6c3" id="r_a00ef7431682dc98384dda6c33be7f6c3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00ef7431682dc98384dda6c33be7f6c3">findRokuDevices</a> (const char *interface, size_t maxDevices, size_t urlStringSize, char *deviceList[])</td></tr>
-<tr class="memdesc:a00ef7431682dc98384dda6c33be7f6c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find Roku devices on the network using SSDP.  <br /></td></tr>
+<tr class="memitem:a8710a6ddf77876474ef6aff86d756bda" id="r_a8710a6ddf77876474ef6aff86d756bda"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8710a6ddf77876474ef6aff86d756bda">findRokuDevices</a> (const char *iface, size_t maxDevices, size_t urlStringSize, char *deviceList[])</td></tr>
+<tr class="memdesc:a8710a6ddf77876474ef6aff86d756bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find Roku devices on the network using SSDP.  <br /></td></tr>
 <tr class="memitem:ac1e9d61278cb0d9fc848a13f90dcfa1c" id="r_ac1e9d61278cb0d9fc848a13f90dcfa1c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac1e9d61278cb0d9fc848a13f90dcfa1c">getRokuDevice</a> (const char *url, <a class="el" href="struct_roku_device.html">RokuDevice</a> *device)</td></tr>
 <tr class="memdesc:ac1e9d61278cb0d9fc848a13f90dcfa1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get information about a Roku Device from its ECP URL.  <br /></td></tr>
 <tr class="memitem:a7c14c02e79e01977dbe94aa52b8b3760" id="r_a7c14c02e79e01977dbe94aa52b8b3760"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c14c02e79e01977dbe94aa52b8b3760">rokuSendKey</a> (const <a class="el" href="struct_roku_device.html">RokuDevice</a> *device, const char *key)</td></tr>
@@ -159,8 +159,8 @@ Functions</h2></td></tr>
 <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
 <p>You should have received a copy of the GNU General Public License along with this program. If not, see <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a00ef7431682dc98384dda6c33be7f6c3" name="a00ef7431682dc98384dda6c33be7f6c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00ef7431682dc98384dda6c33be7f6c3">&#9670;&#160;</a></span>findRokuDevices()</h2>
+<a id="a8710a6ddf77876474ef6aff86d756bda" name="a8710a6ddf77876474ef6aff86d756bda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8710a6ddf77876474ef6aff86d756bda">&#9670;&#160;</a></span>findRokuDevices()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -168,7 +168,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">int findRokuDevices </td>
           <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>interface</em></span>, </td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>iface</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -191,7 +191,7 @@ Functions</h2></td></tr>
 <p>Find Roku devices on the network using SSDP. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">interface</td><td>Name of network interface to search on. Set NULL to auto-select the primary interface. </td></tr>
+    <tr><td class="paramname">iface</td><td>Name of network interface to search on. Set NULL to auto-select the primary interface. </td></tr>
     <tr><td class="paramname">maxDevices</td><td>Maximum number of devices to look for </td></tr>
     <tr><td class="paramname">urlStringSize</td><td>Size of destination URL strings (recommended 30) </td></tr>
     <tr><td class="paramname">deviceList</td><td>Array (of size maxDevices) of strings (size urlStringSize), which will be updated to contain the ECP URLs of found Roku Devices. Remaining elements, if any, will be made empty strings. </td></tr>
