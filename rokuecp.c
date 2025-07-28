@@ -155,10 +155,10 @@ static void fillFromXML(const xmlNode* parentElement, bool attrMode, struct xmlE
     }
 }
 
-int findRokuDevices(const char* interface, const size_t maxDevices, const size_t urlStringSize, char* deviceList[]) {
+int findRokuDevices(const char* iface, const size_t maxDevices, const size_t urlStringSize, char* deviceList[]) {
     // Set up gssdp to look for Roku devices
     GError* error = NULL;
-    GSSDPClient* ssdpClient = gssdp_client_new_full(interface, NULL, 0, GSSDP_UDA_VERSION_1_0, &error);
+    GSSDPClient* ssdpClient = gssdp_client_new_full(iface, NULL, 0, GSSDP_UDA_VERSION_1_0, &error);
     if (error) {
         int errorCode = error->code;
         g_object_unref(ssdpClient);

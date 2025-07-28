@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(rokuecp VERSION 0.2.0.20250716)
+project(rokuecp VERSION 0.2.0.20250728)
 set(CMAKE_C_STANDARD 11)
 option(DOCS "Generate documentation" off)
 

@@ -131,14 +131,14 @@ typedef struct {
 
 /**
  * Find Roku devices on the network using SSDP.
- * @param interface Name of network interface to search on. Set NULL to auto-select the primary interface.
+ * @param iface Name of network interface to search on. Set NULL to auto-select the primary interface.
  * @param maxDevices Maximum number of devices to look for
  * @param urlStringSize Size of destination URL strings (recommended 30)
  * @param deviceList Array (of size maxDevices) of strings (size urlStringSize), which will be updated to contain the
  *                   ECP URLs of found Roku Devices. Remaining elements, if any, will be made empty strings.
  * @return Number of devices found within five seconds, or a negated gssdp error code
  */
-int findRokuDevices(const char* interface, size_t maxDevices, size_t urlStringSize, char* deviceList[]);
+int findRokuDevices(const char* iface, size_t maxDevices, size_t urlStringSize, char* deviceList[]);
 
 /**
  * Get information about a Roku Device from its ECP URL.
